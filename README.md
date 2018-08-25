@@ -2,11 +2,11 @@
 
 This repository contains three main topics:
 
-/>    Instruction of the existing tools. 
+   1, Instruction of the existing tools. 
   
-/>    The dummy project I did.
+   2, The dummy project I did.
   
-/>    The new tools I made. (the most valuable part)
+   3, The new tools I made. (the most valuable part)
 
 <br/>
 <br/>
