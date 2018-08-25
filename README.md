@@ -9,6 +9,14 @@ This repository contains three main topics:
 ### 3, The new tools I made. (the most valuable part)
 
 
+
+
+
+
+
+
+
+
 ## 1, Instruction of the existing tools.
 In first section, the file name starts with 'learn_', there are scripts teaching you how to use data-analysis and visualization tools like pandas, matplotlib, pyecharts...  This part contains the tutorial material I made as well as some resource on the internet.
 
@@ -21,6 +29,11 @@ Those data-analysis tools, whose name starts with 'DAT_' is designed based on ex
 mark: the DATs based on pandas are predecessors of library Bamboo, which is currently not published usefull data-analysis tool.
 
 mark: Project Athena will needs some classes and functions from this repository.
+
+
+
+
+
 
 # Project Athena: 
 AI-based automative data analysis tool which acts like a experienced data scientist, tells you import facts in the dataframe, interact with you to make conclusions and predictions.
