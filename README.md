@@ -27,7 +27,7 @@ There are scripts teaching you how to use data analysis and visualization tools 
 
 Those projects are either made-up projects or the project owned by me. It is the demonstration of how to use those tools in practical cases. 
 
-> most of the py file cannot be complied correctly because I haven't provided the data file.
+> Most of the py file cannot be complied correctly because I haven't provided the data file.
 
 ## 3, The new tools I made.
 
@@ -35,7 +35,7 @@ Those projects are either made-up projects or the project owned by me. It is the
 
 Those data-analysis tools are designed based on existed tools. I use them to simplify some task during the data analysis process.
 
-> the DATs based on pandas are predecessors of library Bamboo, which is currently not published useful data-analysis tool.
+> The DATs based on pandas are predecessors of library Bamboo, which is currently not published useful data-analysis tool.
 
 > Project Athena will need some classes and functions from this repository.
 
