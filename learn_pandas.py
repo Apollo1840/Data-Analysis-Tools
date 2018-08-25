@@ -1,0 +1,418 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+if __name__ == '__main__':
+    
+    # 0 - creat DataFrame
+    
+    # way 1
+    data = [[1, 2], [3, 4], [5, 6]] 
+    df0 = pd.DataFrame(data, index=[1,2,3], columns=['x','y'])
+    print(df0)
+    
+    # way 2
+    data = {'id': [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2],
+            'x': [1.2, 2, 3, 4, 5.6, 6, 7, 8, 9.4, 10, 11, 12],
+            'y': [13, 9, 8, 4, np.nan, 0, 5, np.nan, 7, 7, 10, 11],
+            'obj': [np.random.choice(['a','b','c']) for _ in range(12)]
+            }
+    df1 = pd.DataFrame(data)
+    print(df1)
+    
+    
+    
+    # read dataFrame
+    df2 = pd.read_excel('datasets/sample.xlsx')
+    print(df2)
+    
+    # read a part of csv
+    df2 = pd.read_csv('...', usecols = ['',''], nrows=10)
+    
+    
+    '''
+    the most powerful read fuction of pandas is read_table,
+    you can adjust sep,header,names(column) of it.
+    
+    something even more specific:
+        dtype={'beer_servings':float}
+    
+    '''
+
+    
+    
+    # show dataFrame
+    print(df1.describe())
+    print(df1.describe(include='all'))
+    print(df1.describe(include=['object']))
+    print(df1.describe(include=[np.number]))
+    df1['x','y'].describe()
+
+    print(df1.dtypes)
+    print(df1.info())  # dtypes + exists null or not
+    
+    # plot the dataframe
+    df1.plot()  # it plots as row number is x axis, each column is a instance
+    df1.plot('bar')  # this always for pivot table.
+    df1.x.plot('hist')
+    
+    
+    # very usefull
+    print(df1.values)  
+    print(df1.shape)
+    print(df1.values.shape)
+    
+    
+    # -------------------------------------------------------------------------
+    # 1 - selection
+    
+    print(df2)
+    
+    # 1.0 index 
+    print(df2.index)
+    df2.index = [str(i) for i in df2.index]
+    df2[2:3]        # works
+    df2['2':'4']    # also works
+    df_new = df2.set_index('name')
+    df_new[:'ddf']   # until the last 'ddf'
+    
+    df2.reset_index()
+    
+    # 1.1 - row 
+    print(df2.loc[4])  # return as series
+    print(df2.iloc[4])  # original index from 0 to n
+    
+    # 1.2 - column
+    print(df1['y'])
+    print(df1[['x','y']])
+    print(df1.y)
+    
+    # column name
+    print(df2.columns)
+    print(df2.columns[1])
+    
+    # rename
+    df2.columns = ['name','code','note','pass']
+    df3 = df2.rename(columns={'note': 'notes'})
+    print(df3)
+       
+    # 1.3 - sub dataFrame
+    print(df1.loc[5,'x'])
+    print(df1.loc[5, ['x', 'y']])
+    print(df1.iloc[:3,:2])
+        
+    df1.loc[5,'sign']='good'
+    
+    
+    # 1.4 - conditional selection 
+    df2.loc[[True, False, True, True, False],'sign']
+    df2 
+    df2.loc[df2.notes > 40,'sign']
+    df2
+    # simpler: df2[df2.notes > 40] 
+
+    df2.loc[(df2.gender=='m') | (df2.gender=='f'), :]
+    df2.loc[df2.gender.isin(['m', 'f']), :]
+   
+    # df2.query('gender==["m","f"]')
+        
+    '''
+    you can assign new value after the selection
+    '''
+    
+    # select via data type
+    df2.select_dtypes(include = [np.number])
+    
+    
+    # -------------------------------------------------------------------------
+    # 3 - Update
+
+    # 3.1 - add row & column
+    print(df2)
+    
+    # 1) add row
+    # append a new row
+    df2.append({'name':'adx'}, ignore_index=True)
+    
+    res = ['wad',3,54,1]
+    df2.append(pd.Series(res,index=df2.columns), ignore_index=True)
+    
+    # add a row with its index
+    df2.loc[6]=['dad', 5, 45, 0]
+    print(df2)
+    
+    # add row by dataFrame
+    print(pd.concat([df1, df1], axis=0)) # df1 + df1
+    
+    # 2) add column
+    df2['gender']=['m','f','m',np.nan,'m','f']
+    
+    df2['new'] = df2.xx + df2.yy
+    df2['new'] = df2.xx * df2.yy  # be careful, this is entrywise multiplication by index
+   
+    # add column by dataFrame
+    print(pd.concat([df1, df1], axis=1))  
+    
+    
+    # 3.2 delete row & column
+    df2.drop(index=[0,1])
+    df2.drop(columns = ['code'])
+    
+    # or via axis
+    df2.drop([0,1], axis=0)
+    df2.drop(['code'], axis=1)
+    
+    # or via del
+    del df2['code']
+    
+    
+    # 1) deal with N/A
+    # drop rows
+    df1.dropna()
+    df1.dropna(how='all')
+    df1.dropna(thresh=2)
+    df1.dropna(subset=['x', 'y'])  # only focus on some columns
+    
+    print(df1)  # this do not change
+    
+    # drop columns
+    df1.dropna(axis='columns')  # drop the columns which contains NA
+    
+    # fillna
+    print(df1.fillna(0))
+    print(df1.fillna(method='ffill'))
+    
+    # 2) deal with duplicates
+    df2['pass'].drop_duplicates()
+    df1.drop_duplicates(subset=['id', 'x'])
+    df2['pass'].drop_duplicates(keep='last')
+
+
+    # -------------------------------------------------------------------------
+    # 4 - operator of column
+
+    # str.strip('zou congyu ')
+    # str.upper('zou congyu')
+    # str.lower('ZOU CONGYU')
+    # 'zou congzou is zou'.strip('zou')
+    
+    # apply function
+    ['hello world','hi you'].apply(str.upper)  # this will return error, only series works
+    df2['name']=df2['name'].apply(str.strip)  # remove the first and last blank character
+    
+    df2.note = df2.note.apply(lambda x: 10*x)
+    print(df2)
+    
+    # we have some embeded functions:
+    # general
+    print(df2.notes.describe())
+    print(df2.notes.describe().round(2))
+#
+    df2.note = df2.note.astype('float')
+    df2['pass'] = df2['pass'].astype('int')  # change boolean to 1,0
+    df2.land = df2.land.astype('category')  # change object column to category
+    df2.land.cat.codes # this returns the category code of the column, everything based on this column will be faster
+    
+    
+    '''
+    
+    you can make the category ordered by:
+        labels_quality = ['bad','middle','good']
+        df.level = pd.cut(df.quality, bins = 5, labels=labels_quality)
+        df.level.astype('category', categories=labels_quality, ordered=True)
+    
+    then:
+        df.sort_values('level')
+        df.loc[df.level > 'bad']
+    
+    
+    '''
+    
+    
+    # for str
+    print(df2.name.str.strip())
+    print(df2.name.str.contains('a'))
+    print(df2.name.replace('haha','hahaha'))
+    
+    # for value
+    print(df2['pass'].sum())
+    print(df2['pass'].mean())
+    print(df2['pass'].std())
+    
+    # for object
+    print(df2.land.unique())   
+    print(df2.land.nunique()) 
+    print(df2.age.value_counts())
+    print(df2.age.value_counts(normalize=True))
+ 
+
+    # -------------------------------------------------------------------------
+    # 5 - advance
+    
+    # 5.1 sort    
+    print(df2.sort_values(by=['pass', 'notes'])) # return type, logically first pass then notes
+    print(df2)  # this do not change
+    
+    print(df2.sort_values(by=['pass', 'notes'],ascending=False, na_position='first')) # return type, logically first pass then notes
+    
+    df2.sort_index()
+    
+    
+    # 5.2 merge
+    dfl = pd.DataFrame({
+            'city': ['beijing ','tokyo','newyork', 'munich'],
+            'temp': [23,24,28, 26]
+            })
+    
+    dfr = pd.DataFrame({
+            'city': ['beijing ','tokyo','newyork', 'san'],
+            'humid': [12,23,14, 19]
+            })
+    
+    dfc = pd.DataFrame({
+            'city': ['beijing ','tokyo','newyork','tianjing'],
+            'temp': [23,24,28,21],
+            'humid': [12,23,14,10]
+            })
+    
+    pd.merge(dfl,dfr, on='city')
+    pd.merge(dfl,dfr, on='city', how='outer')
+    pd.merge(dfl,dfr, on='city', how='left')
+    
+    pd.merge(dfl,dfc, on='city', how='outer')
+    
+    # merge 2 tables with same columns will cause duplicate columns
+    def merge_without_duplicate(df1,df2,on,how):
+        return pd.merge(df1,df2[list(df2.columns.difference(df1.columns)) + [on]], on=on, how=how)
+    merge_without_duplicate(dfl,dfc,'city', how='outer')
+    
+    # 5.3 group by
+    df2.groupby('pass').count()  # how many non NA values
+    df2.groupby('pass')['name'].count()
+    df2.groupby(['pass','gender'])['name'].count()  # pivot table
+
+    df2.groupby('pass')['sign'].agg([len])      # nan is included
+    df2.groupby('pass')['notes'].agg([len, 'count', np.sum, np.mean])
+    df2.groupby('pass')['notes', 'code'].agg([len, np.sum, np.mean])
+    
+    '''
+     pandas has its default 'Grouper' like 'Every Month' especially for date
+    
+    '''
+    
+    # make the result to be normal dataframe for further development
+    df2_2 = df2.groupby('pass')['notes'].agg([len, np.sum, np.mean])
+    print(df2_2)
+    
+    df2_2 = df2_2.reset_index()  
+    print(df2_2)
+    
+    # pivot table
+    df2=pd.read_excel('datasets/PUBG.xlsx')
+    df2
+    
+    df3=pd.pivot_table(df2, index = 'Level', columns = 'Gender', values = 'Kills', aggfunc = [np.mean])
+    print(df3)
+    
+    df3=pd.pivot_table(df2, index = 'Level', columns = 'Gender', values = 'Kills', aggfunc = [np.mean], margins = True) # margins means entry for all
+    print(df3)
+    
+    df3=pd.pivot_table(df2, index = ['Level', 'Group'], columns = ['Gender','Place'], values = 'Kills', aggfunc = [np.mean])
+    print(df3)
+    
+   
+    
+    # ------------------------------------------------------------------------
+    # 6 - tricks
+    
+    # 6.1 transform the column
+    df2.name.isnull()  # return a new boolean column, in which NA is False
+    
+    
+    x=np.array([1,2,3,4,5])
+    print(x>2)
+    print(np.where(x>2))  # return index of true
+    print(np.where(x>2,'big','small'))  # return list
+    # print(np.where(x>2, [1,2,3,4],[0,0,0,0])) # return array
+    
+    # for assignment, can not use df2.age
+    df2['age']=np.where(df2.Kills>2,'big','small')
+    df2
+    
+    
+
+    # 6.2 pd.cut
+    print(df1.x)
+    pd.cut(df1.x, bins=4)
+    pd.cut(df1.x, [0,3,6,9,12], labels=['a','b','c','d'])
+    
+    # 6.3 split the column
+    'zou congyu'.split(' ')
+    df2['supervisor']=['Feng Shangsu','Zou Congyu','Oh Sehun','S Zuu', 'de dfad','tr saf']
+    df_new = pd.DataFrame([name.split(' ') for name in df2.supervisor], columns = ['firstname','lastname'])
+    df_new
+    pd.concat([df2, df_new],axis=1)
+    
+    
+    # 6.4 crosstab
+    pd.crosstab(series1, series2)
+    
+    
+    
+    
+    # ------------------------------------------------------------------------
+    # 7 - statistics
+    df2
+    df2.sample(2)
+    df2.sample(2, weights=[0.1,0.1,0.1,0.1,0.3,0.3])
+    df2.sample(2, weights=[0.1,0.1,0.1,0.1,0.3,0.3], replace = True)
+    
+    df1.x.cov(df1.y)
+    df1.x.corr(df1.y)
+    df2.corr()
+    
+    df2.to_excel('sample_output.xlsx')
+    
+    pd.set_option('display.max_columns', None)
+       
+    df2['pass'] = df2['pass'].astype('object')
+    pd.get_dummies(df2)
+    
+    
+    # ----------------------------------------------------------------------
+    # 8 - further development
+    for index, row in df.iterrows():
+        print(index, row.abc, row.efg)
+        
+    
+    
+    
+
+    
+
+    
+
+    
+    
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 12 17:00:11 2018
+This py file contains commands I used to create the first Data analysis project displayed on my personal website:
+http://zoucongyu.strikingly.com
 
-@author: zouco
+It contains many useful methods which maybe used in Athena project.
+
 """
 
 import pandas as pd

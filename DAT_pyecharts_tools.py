@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 23 15:23:54 2018
+extension of pyecharts
 
-@author: zouco
 """
 from pyecharts import Boxplot
 

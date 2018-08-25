@@ -5,16 +5,23 @@ Created on Sat Jul 14 16:29:23 2018
 @author: zouco
 """
  
-# give df return meaningful heatmap
- import pandas as pd
- import numpy as np
+# main topic: give df, return meaningful heatmap
+
+import pandas as pd
+import numpy as np
 
 
-# step 1 enumerate all the possible heatmap  
+# step 1 enumerate all the possible heatmap
+# step 2 use heatmap_rubik to modify the heatmap  
 
 import pandas_extend as pde
 
 def heatmap_rubik(m):
+    '''
+    take a matrix, return rubik transformation of the matrix which has special properties
+    
+    '''
+    
     ref_list=[]
     for i in range(m.shape[0]):
         ref_list.append(np.ma.median(m[i,:]))
@@ -29,7 +36,8 @@ def heatmap_rubik(m):
     return m
 
 def heatmap_rubik_df(df):
-    # only works for denoted pivot table
+    # only works for denoted pivot table created by pde.pivot_table_df
+    
     ref_list=[]
     for i in range(df.shape[0]):
         ref_list.append(np.ma.median(df.iloc[i,1:]))
