@@ -6,7 +6,7 @@ This repository contains three main topics:
   
    2, The dummy project I did.
   
-   3, The new tools I made. (the most valuable part)
+   3, The new tools I made. **(the most valuable part)**
 
 <br/>
 <br/>
