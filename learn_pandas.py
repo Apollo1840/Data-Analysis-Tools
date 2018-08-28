@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     
-    # 0 - creat DataFrame
+    # 0 - create DataFrame
+    
+    # 0.1 create
     
     # way 1
     data = [[1, 2], [3, 4], [5, 6]] 
@@ -22,7 +24,7 @@ if __name__ == '__main__':
     df1 = pd.DataFrame(data)
     print(df1)
     
-    
+    # 0.2 read
     
     # read dataFrame
     df2 = pd.read_excel('datasets/sample.xlsx')
@@ -55,8 +57,9 @@ if __name__ == '__main__':
     
     # plot the dataframe
     df1.plot()  # it plots as row number is x axis, each column is a instance
-    df1.plot('bar')  # this always for pivot table.
-    df1.x.plot('hist')
+    df1.plot(kind='bar')  # this always for pivot table.
+    df1.x.plot(kind='hist')
+    df1.x.plot(kind='box')
     
     
     # very usefull
@@ -127,9 +130,9 @@ if __name__ == '__main__':
     
     
     # -------------------------------------------------------------------------
-    # 3 - Update
+    # 2 - Update
 
-    # 3.1 - add row & column
+    # 2.1 - add row & column
     print(df2)
     
     # 1) add row
@@ -156,7 +159,7 @@ if __name__ == '__main__':
     print(pd.concat([df1, df1], axis=1))  
     
     
-    # 3.2 delete row & column
+    # 2.2 delete row & column
     df2.drop(index=[0,1])
     df2.drop(columns = ['code'])
     
@@ -171,6 +174,7 @@ if __name__ == '__main__':
     # 1) deal with N/A
     # drop rows
     df1.dropna()
+    df1.dropena(how='any') # default
     df1.dropna(how='all')
     df1.dropna(thresh=2)
     df1.dropna(subset=['x', 'y'])  # only focus on some columns
@@ -188,10 +192,17 @@ if __name__ == '__main__':
     df2['pass'].drop_duplicates()
     df1.drop_duplicates(subset=['id', 'x'])
     df2['pass'].drop_duplicates(keep='last')
-
-
+    
+    # the attribute - subset
+    df1.dropna(subset=['x', 'y'])
+    df1.drop_duplicates(subset=['id', 'x'])
+    
+    
+    
+    
+    
     # -------------------------------------------------------------------------
-    # 4 - operator of column
+    # 3 - operator of column
 
     # str.strip('zou congyu ')
     # str.upper('zou congyu')
@@ -199,17 +210,19 @@ if __name__ == '__main__':
     # 'zou congzou is zou'.strip('zou')
     
     # apply function
-    ['hello world','hi you'].apply(str.upper)  # this will return error, only series works
     df2['name']=df2['name'].apply(str.strip)  # remove the first and last blank character
     
     df2.note = df2.note.apply(lambda x: 10*x)
     print(df2)
     
+    # map function
+    df2.name = df2.name.map({'haha':'hah'})
+    
     # we have some embeded functions:
     # general
     print(df2.notes.describe())
     print(df2.notes.describe().round(2))
-#
+
     df2.note = df2.note.astype('float')
     df2['pass'] = df2['pass'].astype('int')  # change boolean to 1,0
     df2.land = df2.land.astype('category')  # change object column to category
@@ -217,6 +230,7 @@ if __name__ == '__main__':
     
     
     '''
+    important !!! :
     
     you can make the category ordered by:
         labels_quality = ['bad','middle','good']
@@ -234,7 +248,7 @@ if __name__ == '__main__':
     # for str
     print(df2.name.str.strip())
     print(df2.name.str.contains('a'))
-    print(df2.name.replace('haha','hahaha'))
+    print(df2.name.str.replace('haha','hahaha'))
     
     # for value
     print(df2['pass'].sum())
@@ -249,9 +263,9 @@ if __name__ == '__main__':
  
 
     # -------------------------------------------------------------------------
-    # 5 - advance
+    # 4 - advance
     
-    # 5.1 sort    
+    # 4.1 sort    
     print(df2.sort_values(by=['pass', 'notes'])) # return type, logically first pass then notes
     print(df2)  # this do not change
     
@@ -260,7 +274,7 @@ if __name__ == '__main__':
     df2.sort_index()
     
     
-    # 5.2 merge
+    # 4.2 merge
     dfl = pd.DataFrame({
             'city': ['beijing ','tokyo','newyork', 'munich'],
             'temp': [23,24,28, 26]
@@ -278,6 +292,7 @@ if __name__ == '__main__':
             })
     
     pd.merge(dfl,dfr, on='city')
+    # pd.merge(dfl, dfr, left_on='city', right_on='city')
     pd.merge(dfl,dfr, on='city', how='outer')
     pd.merge(dfl,dfr, on='city', how='left')
     
@@ -288,7 +303,8 @@ if __name__ == '__main__':
         return pd.merge(df1,df2[list(df2.columns.difference(df1.columns)) + [on]], on=on, how=how)
     merge_without_duplicate(dfl,dfc,'city', how='outer')
     
-    # 5.3 group by
+    
+    # 4.3 group by
     df2.groupby('pass').count()  # how many non NA values
     df2.groupby('pass')['name'].count()
     df2.groupby(['pass','gender'])['name'].count()  # pivot table
@@ -298,7 +314,7 @@ if __name__ == '__main__':
     df2.groupby('pass')['notes', 'code'].agg([len, np.sum, np.mean])
     
     '''
-     pandas has its default 'Grouper' like 'Every Month' especially for date
+     pandas has its default 'Grouper' like 'Every Month' especially for date.
     
     '''
     
@@ -316,19 +332,29 @@ if __name__ == '__main__':
     df3=pd.pivot_table(df2, index = 'Level', columns = 'Gender', values = 'Kills', aggfunc = [np.mean])
     print(df3)
     
-    df3=pd.pivot_table(df2, index = 'Level', columns = 'Gender', values = 'Kills', aggfunc = [np.mean], margins = True) # margins means entry for all
+    df3=pd.pivot_table(df2, index = 'Level', columns = 'Gender', values = 'Kills', aggfunc = [np.mean], 
+                       margins = True) # margins means entry for all
     print(df3)
     
-    df3=pd.pivot_table(df2, index = ['Level', 'Group'], columns = ['Gender','Place'], values = 'Kills', aggfunc = [np.mean])
+    # final
+    df3=pd.pivot_table(df2, 
+                       index = ['Level', 'Group'], 
+                       columns = ['Gender','Place'], 
+                       values = 'Kills', 
+                       aggfunc = [np.mean],
+                       margins = True)
     print(df3)
     
    
     
     # ------------------------------------------------------------------------
-    # 6 - tricks
+    # 5 - trick
     
-    # 6.1 transform the column
+    # 5.1 transform the column
     df2.name.isnull()  # return a new boolean column, in which NA is False
+    df2.isnull(subset=[])
+    df2.name.duplicated(keep=None)  # default is keep = 'first'
+    
     
     
     x=np.array([1,2,3,4,5])
@@ -343,12 +369,12 @@ if __name__ == '__main__':
     
     
 
-    # 6.2 pd.cut
+    # 5.2 pd.cut
     print(df1.x)
     pd.cut(df1.x, bins=4)
     pd.cut(df1.x, [0,3,6,9,12], labels=['a','b','c','d'])
     
-    # 6.3 split the column
+    # 5.3 split the column
     'zou congyu'.split(' ')
     df2['supervisor']=['Feng Shangsu','Zou Congyu','Oh Sehun','S Zuu', 'de dfad','tr saf']
     df_new = pd.DataFrame([name.split(' ') for name in df2.supervisor], columns = ['firstname','lastname'])
@@ -356,38 +382,109 @@ if __name__ == '__main__':
     pd.concat([df2, df_new],axis=1)
     
     
-    # 6.4 crosstab
+    # 5.4 crosstab
     pd.crosstab(series1, series2)
+    
+    
+    # 5.5 multiple map
+    # for example, in df2, I want a new column, which maps code 1,2 as prior, map code 2,3,4 as nieder
+    df2['class'] = df2.code.isin([1,2]).map({True: 'prior', False: 'nieder'})
+    print(df2)
+    
+    # more abstract:
+    # (condition).map({True:x, False:y})
+    
+    # 5.6 work with datetime
+    # This part is from Markham: https://github.com/justmarkham/pandas-videos/blob/master/pandas.ipynb
+    ufo = pd.read_csv('http://bit.ly/uforeports')
+    ufo['Time'] = pd.to_datetime(ufo.Time)
+    print(ufo.Time.dt.hour)
+    print(ufo.Time.dt.weekday_name)
+    print(ufo.Time.dt.dayofyear)
+    
+    ts = pd.to_datetime('1/1/1999')
+    print(ufo.loc[ufo.Time >= ts, :].head())
+    
+    # it works just like datetime object in datetime
+    (ufo.Time.max() - ufo.Time.min()).days
+    
+    # tricky plot
+    ufo.Time.dt.year.value_counts().sort_index().plot()
+    
+    # pad datetime
+    ufo['month'] = ufo.Time.dt.month.astype('str').str.pad(width=2,fillchar='0')
+    ufo['new_date'] = ufo.Time.dt.year.str.cat(ufo.month, sep='-')
+    
+    
+    
+    
+    
+    
     
     
     
     
     # ------------------------------------------------------------------------
-    # 7 - statistics
+    # 6 - statistics
     df2
+    
+    # sampling
     df2.sample(2)
     df2.sample(2, weights=[0.1,0.1,0.1,0.1,0.3,0.3])
     df2.sample(2, weights=[0.1,0.1,0.1,0.1,0.3,0.3], replace = True)
     
+        
+    # train_test_split by pandas
+    train = df1.sample(frac=0.7)
+    test = df1.loc[~df1.index.isin(train.index),:]
+    
+    # correlation
     df1.x.cov(df1.y)
     df1.x.corr(df1.y)
     df2.corr()
     
-    df2.to_excel('sample_output.xlsx')
+    # dummies
+    pd.get_dummies(df2, columns=['Place'], drop_first=True)
     
-    pd.set_option('display.max_columns', None)
-       
     df2['pass'] = df2['pass'].astype('object')
-    pd.get_dummies(df2)
+    pd.get_dummies(df2['pass'], prefix='pass')
     
     
     # ----------------------------------------------------------------------
-    # 8 - further development
+    # 7 - further development
+    
+    # output 
+    df2.to_excel('sample_output.xlsx')
+    
+    # display option
+    pd.set_option('display.max_columns', None)
+    pd.reset_option('display.max_rows')
+    pd.describe_option('float')  # search display options for keyword - 'float'
+    pd.reset_option('all')
+    
+    
+    # apply can also apply to dataFrame
+    df1.apply(np.argmax, axis=1)
+    df1.applymap(int)   # apply this function to all cells
+    
+    # iterration
     for index, row in df.iterrows():
         print(index, row.abc, row.efg)
         
+    # long table
+    print(df1)
+    df_stack = df1.stack()
+    df0 = df_stack.reset_index()
+    df0.columns=['id', 'category', 'value']
+    df0
+    
+    df_1 = df_stack.unstack()
+
     
     
+    #---------------------------------------------------------------------
+    # 8 - bonus
+    df1.memory_usage(deep=True)
     
 
     
