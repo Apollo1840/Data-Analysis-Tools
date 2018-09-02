@@ -269,7 +269,7 @@ heatmap.render(title+'.html')
 # 01 attr column 1
 
 y_attr = 'content_rating'
-dfr=pde.r_table(df[y_attr])
+dfr = df[y_attr].value_counts().reser_index()
 print(dfr.level[:5])
 x_axis = ['G','PG','PG-13','R','Not Rated']
 
@@ -678,7 +678,7 @@ l=Line(title, title_pos='center')
 l.add('all', x_axis=list(dfv.index), y_axis=dfv.values, xaxis_interval=0, is_fill=True,
         area_opacity = 0.3, legend_top='7%')
 
-dfv2=pde.r_table(df['country'])
+dfv2 = df['country'].value_counts().reset_index()
 
 for i in dfv2.level[:5]:
     dfv=df.loc[df['country']==i,:].groupby(attr+'_level')['gross(billion)'].agg(sum)

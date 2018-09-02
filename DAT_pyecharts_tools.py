@@ -3,7 +3,12 @@
 extension of pyecharts
 
 """
-from pyecharts import Boxplot
+from pyecharts import Boxplot,Sankey
+
+
+
+# --------------------------------------------------------------------------
+# more for boxplot
 
 def boxplot_of_2_attr(df, value, attr1, attr2):
     
@@ -21,6 +26,12 @@ def boxplot_of_2_attr(df, value, attr1, attr2):
 
     
 def data_of_2_attr(df,value,attr1,attr2):
+    """
+        attr1 and attr2 are all objects
+        this is like df.groupby(attr1, attr2).value
+    
+    """
+       
     name = []
     data = []
     for i in set(df[attr1]):
@@ -35,6 +46,8 @@ def data_of_2_attr(df,value,attr1,attr2):
     return {'name': name, 'data': data}
 
 def prepare_data(list_x):
+    # prepare data for boxplot
+    
     list_y = []
     for i in list_x:
         if len(i) >=3:
@@ -48,6 +61,11 @@ def prepare_data(list_x):
     return list_y
 
 
+
+
+
+# --------------------------------------------------------------------------
+    
 def cross_sankey(df, attr1, attr2, func=len, value=None):
     if value==None:
         df2=df.groupby([attr1, attr2])[attr1].agg([func])

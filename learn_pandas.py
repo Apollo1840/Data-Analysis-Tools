@@ -31,7 +31,7 @@ if __name__ == '__main__':
     print(df2)
     
     # read a part of csv
-    df2 = pd.read_csv('...', usecols = ['',''], nrows=10)
+    df3 = pd.read_csv('...', usecols = ['',''], nrows=10)
     
     
     '''

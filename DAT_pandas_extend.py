@@ -5,17 +5,10 @@ import pandas as pd
 import numpy as np
 
 def choose_columns(df, dt_type='float64'):
-    # pick all the column names which contains dt_type data
+    # pick all the column names which contains dt_type data 
+    # example : choose_columns(df2, np.number)
     
-    # use case:
-    # float_c = choose_columns(df, 'float64')
-    # attr = random.sample(float_c, 2)
-    
-    columns = []
-    for column_name in df.columns:
-        if df[column_name].dtype == dt_type:
-             columns.append(column_name)
-    return columns
+    return list(df.iloc[0:1,:].select_dtypes(include = dt_type).columns)
 
 def quantile_cut_column(df, column_name, quantile_ratio=[0,0.2,0.4,0.6,0.8,1], labels = ['small','medium-small','medium','medium-large','large']):
     # cut the column by quantile, returns the new df (with a new column  '..._level')
@@ -32,8 +25,12 @@ def quantile_cut_column(df, column_name, quantile_ratio=[0,0.2,0.4,0.6,0.8,1], l
 
 
 class da_opt():
-    # import da_opt as dp
-    # use case:  dp.mean()
+    """
+    example:  
+        import da_opt as dp
+        dp.trust_amount = 10
+        dp.mean()
+    """
     
     trust_amount = 10
     replace_num = np.nan    
@@ -44,16 +41,22 @@ class da_opt():
             return np.mean(x)
         else:
             return cls.replace_num
+    
+    @classmethod
+    def deviation_level(cls, x):
+        # x-u/segma
+        m=np.nanmean(x)
+        segma = np.std([j for j in x if j >= x.quantile(0.1) and j <= x.quantile(0.9)])
+        return np.array([np.abs(j-m)/segma for j in x])
 
 def df_to_hm_data(df):
-    # df to heatmap data, enumerate the df by row and column
+    # df to heatmap data of pyecharts, enumerate the df by row and column
     
     value = []
     for i in range(df.shape[0]):
         for j in range(df.shape[1]):
             value.append([i,j,df.iloc[i,j]])
     return value
-
 
 
 
@@ -76,23 +79,13 @@ def sortDF_column(df, column_order):
     df3.columns = columns
     return df3
 
-def r_table(a, table_type='freq'):
-    temp={}
-    for i in a:
-        if i in temp:
-            temp[i]+=1
-        else:
-            temp.update({i:1})
-    if table_type == 'dict':
-        return temp
-    else:
-        df=pd.DataFrame()
-        df['level']=temp.keys()
-        df['freq']=temp.values()
-        return df.sort_values(by='freq', ascending=False)        
-
 
 def drop_outliers(df, list_column, level = 4):
+    """
+     here the outlier is defined as x-u < level*std
+     
+    """
+    
     for i in list_column:
         m=np.nanmean(df[i])
         segma = np.std([j for j in df[i] if j >= df[i].quantile(0.1) and j <= df[i].quantile(0.9)])
@@ -101,6 +94,15 @@ def drop_outliers(df, list_column, level = 4):
     return df
 
 class multi_content_column():
+    
+    """
+    how to use:
+            mcc = multi_content_column(df.genres,'|')
+            mcc2 = multi_content_column(df.plot_keywords,'|')
+            print(mcc.num_classes)
+            # print(mcc.list_of_classes)
+            # print(mcc2.list_of_classes[:10])
+    """
     
     def __init__(self,column,sep=' '):
         self.column=column
@@ -122,38 +124,31 @@ class multi_content_column():
     def classes(self):
         content = []
         for i in self.column:
-            content.extend(i.split(self.sep))
-        return r_table(content, 'dict')
+            content.extend(i.split(self.sep))  
+        return pd.Series(content).value_counts()
     
     @property
     def num_classes(self):
-        return len(self.classes.keys())
+        return self.classes.shape[0]
     
-    def list_classes(self, order='alpha', lb=0):
-        if order=='alpha':
-            return sorted(self.classes.keys())
-        elif order=='freq':
-            return [(i,j) for j,i in sorted(zip(self.classes.values(), self.classes.keys()), reverse=True) if j>=lb]
-        else:
-            return self.classes.keys()
+    @property
+    def list_classes(self):
+        return sorted(list(self.classes.index))
         
     def contains(self, content):
         # returns a list of bool, length equal to number of rows, True means the content is in that row.
         return [content in i for i in self.value]
     
     
-        
-        
-
 if __name__=='__main__':
-    mcc=multi_content_column(df.genres,'|')
-    mcc2=multi_content_column(df.plot_keywords,'|')
-    print(mcc.num_classes)
-    # print(mcc.list_of_classes('freq'))
-    # print(mcc2.list_of_classes('freq',lb=10))
-    print(r_table(df.title_year))
+
     
     a=[[1,2],[3,5],[5]]
     [5 in i for i in a]
-    
+
+
+
+
+
+
  
