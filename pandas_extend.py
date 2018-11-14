@@ -139,7 +139,20 @@ class multi_content_column():
         # returns a list of bool, length equal to number of rows, True means the content is in that row.
         return [content in i for i in self.value]
     
-    
+
+
+def more_info(df):
+    var = [] ; l = [] ; na=[]; t = []
+    for x in df:
+        var.append(x)
+        l.append(len(pd.value_counts(df[x])))
+        t.append(df[x].dtypes)
+        na.append(sum(df[x].isnull()))
+    info = pd.DataFrame( { 'Variable' : var , 'Levels' : l , 'missing_value': na,'Datatype' : t } )
+    info.sort_values( by = 'Levels' , inplace = True )
+    return info
+
+ 
 if __name__=='__main__':
 
     

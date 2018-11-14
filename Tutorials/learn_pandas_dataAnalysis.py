@@ -25,6 +25,14 @@ something even more specific:
 '''
 
 
+data = {'id': [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2],
+            'x': [1.2, 2, 3, 4, 5.6, 6, 7, 8, 9.4, 10, 11, 12],
+            'y': [13, 9, 8, 4, np.nan, 0, 5, np.nan, 7, 7, 10, 11],
+            'obj': [np.random.choice(['a','b','c']) for _ in range(12)]
+            }
+df1 = pd.DataFrame(data)
+print(df1)
+
 
 # ---------------------------------------------------------------
 # clean the data
@@ -97,7 +105,26 @@ df2.to_excel('sample_output.xlsx')
 df1.plot()  # it plots as row number is x axis, each column is a instance
 df1.plot(kind='bar')  # this always for pivot table., each columns is a instance
 df1.x.plot(kind='hist')
+# df1.x.hist(bins=5, ax=plt.figure().add_subplot(1,2,1))
+
 df1.x.plot(kind='box')
+df1.x.plot(kind='kde')
+
+# it will always plot on same ax
+
+fig=plt.figure()
+
+ax1=fig.add_subplot(311)
+df1.x.plot(kind='hist')
+
+ax2=fig.add_subplot(312, sharex = ax1)
+df1.x.plot(kind='hist')
+
+ax3=fig.add_subplot(313,)
+df1.x.plot(kind='kde')
+
+plt.show()
+
 
 
 

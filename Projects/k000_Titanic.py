@@ -151,7 +151,7 @@ y_train = df.iloc[:,0].values
 
 from sklearn.linear_model import LogisticRegression
 
-lr = LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
+lr = LogisticRegression(C=2, penalty='l1', tol=1e-8)
 lr.fit(x_train,y_train)
 
 # evaluate the model
@@ -239,5 +239,15 @@ predictions = bagging_clf.predict(x_test)
 
 result = pd.DataFrame({'PassengerId':data_test['PassengerId'].values, 'Survived':predictions.astype(np.int32)})
 result.to_csv("datasets\\k000_titanic\\logistic_regression_predictions2.csv", index=False)
+
+
+
+
+
+
+
+
+
+
 
 

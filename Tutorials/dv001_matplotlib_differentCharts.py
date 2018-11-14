@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import numpy as np
+
+
+
 import matplotlib.pyplot as plt
 
 %matplotlib qt
@@ -13,23 +15,24 @@ import matplotlib.pyplot as plt
     5 animation
 '''
 
-
-
-
-# --------------------------------------------------------------------------
-# 1 line and dots
+# ---------------------------------------------------------------------------
+# 0 data
+import numpy as np
 x = np.random.randn(20)*10 + 20
 x = np.sort(x)
 x = x.reshape(10,2)
 print(x)
+
+import pandas as pd
+df = pd.read_csv('Tutorials\\matplotlib_data0.csv')
+df.head()
+
+
+# --------------------------------------------------------------------------
+# 1 line and dots
 plt.plot(x[:,0], x[:,1], 'b')
 plt.plot(x[:,0], x[:,1], 'ro')
 plt.show()
-
-
-
-
-
 
 
 
@@ -53,8 +56,8 @@ plt.show()
 
 # axis
 # use this to display coefficients
-plt.plot(np.random.randn(1,100).T, 'o', label='first trial')
-plt.plot(np.random.randn(1,100).T, '^', label='second trial')
+plt.plot(np.random.randn(1,10).T, 'o', label='first trial')
+plt.plot(np.random.randn(1,10).T, '^', label='second trial')
 plt.xticks(range(10), [i for i in 'abcdefghlj'],rotation=90)
 plt.show()
     
