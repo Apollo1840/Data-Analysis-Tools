@@ -113,7 +113,7 @@ class multi_content_column():
         # break the content into several elements in list
         value = []
         for i in self.column:
-            value.append(i.split(self.sep))
+            value.append([j.strip() for j in i.split(self.sep)])
         return value
     
     @property
@@ -124,7 +124,7 @@ class multi_content_column():
     def classes(self):
         content = []
         for i in self.column:
-            content.extend(i.split(self.sep))  
+            content.extend([j.strip() for j in i.split(self.sep)])  
         return pd.Series(content).value_counts()
     
     @property

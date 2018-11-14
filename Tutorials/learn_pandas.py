@@ -38,6 +38,9 @@ if __name__ == '__main__':
     the most powerful read fuction of pandas is read_table,
     you can adjust sep,header,names(column) of it.
     
+    header is defaul to be 'infer', it means the first row the data, 
+    you can adjust it to None, and use names to redefine it.
+    
     something even more specific:
         dtype={'beer_servings':float}
     
@@ -67,13 +70,19 @@ if __name__ == '__main__':
     print(df1.shape)
     print(df1.values.shape)
     
+
+
+
+
+
+
     
     # -------------------------------------------------------------------------
     # 1 - selection
+
+    # 1.1 - row 
     
-    print(df2)
-    
-    # 1.0 index 
+    # index
     print(df2.index)
     df2.index = [str(i) for i in df2.index]
     df2[2:3]        # works
@@ -82,34 +91,26 @@ if __name__ == '__main__':
     df_new[:'ddf']   # until the last 'ddf'
     
     df2.reset_index()
-    
-    # 1.1 - row 
+       
     print(df2.loc[4])  # return as series
     print(df2.iloc[4])  # original index from 0 to n
     
     # 1.2 - column
+    
     print(df1['y'])
     print(df1[['x','y']])
     print(df1.y)
     
-    # column name
-    print(df2.columns)
-    print(df2.columns[1])
-    
-    # rename
-    df2.columns = ['name','code','note','pass']
-    df3 = df2.rename(columns={'note': 'notes'})
-    print(df3)
-       
     # 1.3 - sub dataFrame
+    
     print(df1.loc[5,'x'])
     print(df1.loc[5, ['x', 'y']])
     print(df1.iloc[:3,:2])
         
     df1.loc[5,'sign']='good'
     
-    
     # 1.4 - conditional selection 
+    
     df2.loc[[True, False, True, True, False],'sign']
     df2 
     df2.loc[df2.notes > 40,'sign']
@@ -129,50 +130,40 @@ if __name__ == '__main__':
     df2.select_dtypes(include = [np.number])
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     # -------------------------------------------------------------------------
     # 2 - Update
+    # add row, delete row, add column, delete column, alter column name
 
-    # 2.1 - add row & column
+    # 2.1 - add row 
+    
+    # add a row with its index
+    df2.loc[6]=['dad', 5, 45, 0]
     print(df2)
     
-    # 1) add row
     # append a new row
     df2.append({'name':'adx'}, ignore_index=True)
     
     res = ['wad',3,54,1]
     df2.append(pd.Series(res,index=df2.columns), ignore_index=True)
     
-    # add a row with its index
-    df2.loc[6]=['dad', 5, 45, 0]
-    print(df2)
-    
     # add row by dataFrame
     print(pd.concat([df1, df1], axis=0)) # df1 + df1
+        
+    # 2.2 - delete row
     
-    # 2) add column
-    df2['gender']=['m','f','m',np.nan,'m','f']
-    
-    df2['new'] = df2.xx + df2.yy
-    df2['new'] = df2.xx * df2.yy  # be careful, this is entrywise multiplication by index
-   
-    # add column by dataFrame
-    print(pd.concat([df1, df1], axis=1))  
-    
-    
-    # 2.2 delete row & column
     df2.drop(index=[0,1])
-    df2.drop(columns = ['code'])
-    
-    # or via axis
     df2.drop([0,1], axis=0)
-    df2.drop(['code'], axis=1)
     
-    # or via del
-    del df2['code']
-    
-    
-    # 1) deal with N/A
-    # drop rows
+    # 1) drop NA:
     df1.dropna()
     df1.dropena(how='any') # default
     df1.dropna(how='all')
@@ -181,14 +172,12 @@ if __name__ == '__main__':
     
     print(df1)  # this do not change
     
-    # drop columns
-    df1.dropna(axis='columns')  # drop the columns which contains NA
-    
     # fillna
     print(df1.fillna(0))
     print(df1.fillna(method='ffill'))
     
-    # 2) deal with duplicates
+    # 2) drop duplicates:
+    df2.drop_duplicates()
     df2['pass'].drop_duplicates()
     df1.drop_duplicates(subset=['id', 'x'])
     df2['pass'].drop_duplicates(keep='last')
@@ -197,28 +186,60 @@ if __name__ == '__main__':
     df1.dropna(subset=['x', 'y'])
     df1.drop_duplicates(subset=['id', 'x'])
     
+    # 2.3 - add column
+    
+    df2['gender']=['m','f','m',np.nan,'m','f']
+    
+    # add column by dataFrame
+    print(pd.concat([df1, df1], axis=1))  
+    
+    # 2.4 - delete column   
+    
+    df2.drop(columns = ['code'])
+    df2.drop(['code'], axis=1)
+    del df2['code']
+    
+    df1.dropna(axis='columns')  # drop the columns which contains NA
+
+    # 2.5 - column name
+    
+    print(df2.columns)
+    print(df2.columns[1])
+    
+    # rename
+    df2.columns = ['name','code','note','pass']
+    df3 = df2.rename(columns={'note': 'notes'})
+    print(df3)
+    
+    
+    
+    
     
     
     
     
     # -------------------------------------------------------------------------
     # 3 - operator of column
-
-    # str.strip('zou congyu ')
-    # str.upper('zou congyu')
-    # str.lower('ZOU CONGYU')
-    # 'zou congzou is zou'.strip('zou')
     
-    # apply function
+    # 3.1 - trial operations
+    
+    df2['new'] = df2.xx + df2.yy
+    df2['new'] = df2.xx * df2.yy  # be careful, this is entrywise multiplication by index
+
+        
+    # 3.2 - apply function
+    
     df2['name']=df2['name'].apply(str.strip)  # remove the first and last blank character
     
     df2.note = df2.note.apply(lambda x: 10*x)
     print(df2)
     
-    # map function
+    # 3.3 - map function
+    
     df2.name = df2.name.map({'haha':'hah'})
     
-    # we have some embeded functions:
+    # 3.4 - we have some embeded functions:
+    
     # general
     print(df2.notes.describe())
     print(df2.notes.describe().round(2))
@@ -260,6 +281,9 @@ if __name__ == '__main__':
     print(df2.land.nunique()) 
     print(df2.age.value_counts())
     print(df2.age.value_counts(normalize=True))
+    
+    
+
  
 
     # -------------------------------------------------------------------------
@@ -444,10 +468,11 @@ if __name__ == '__main__':
     df2.corr()
     
     # dummies
-    pd.get_dummies(df2, columns=['Place'], drop_first=True)
+    pd.get_dummies(df2, columns=['pass'])
+    pd.get_dummies(df2, columns=['pass'], drop_first=True) # without first column
     
-    df2['pass'] = df2['pass'].astype('object')
-    pd.get_dummies(df2['pass'], prefix='pass')
+    # df2['pass'] = df2['pass'].astype('object')
+    pd.get_dummies(df2['pass'], prefix='ps')
     
     
     # ----------------------------------------------------------------------
@@ -459,6 +484,7 @@ if __name__ == '__main__':
     # display option
     pd.set_option('display.max_columns', None)
     pd.reset_option('display.max_rows')
+    
     pd.describe_option('float')  # search display options for keyword - 'float'
     pd.reset_option('all')
     
