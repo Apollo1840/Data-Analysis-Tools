@@ -31,7 +31,7 @@ mpl.style.use( 'ggplot' )
 sns.set_style( 'white' )
 pylab.rcParams[ 'figure.figsize' ] = 8 , 6
 
-from ploters import plot_distribution,plot_categories,plot_correlation_map,plot_variable_importance
+from ploters import plot_distribution, plot_categories, plot_correlation_map,plot_variable_importance
 
 
 
@@ -55,10 +55,12 @@ plot_correlation_map( titanic )
 # Plot distributions of Age of passangers who survived or did not survive
 plot_distribution( titanic , var = 'Age' , target = 'Survived' , row = 'Sex' )
 
-
 # Plot survival rate by Embarked
 plot_categories( titanic , cat = 'Embarked' , target = 'Survived' )
 
+
+
+# sex; embarked; pclass ---
 
 # Transform Sex into binary values 0 and 1
 sex = pd.Series( np.where( full.Sex == 'male' , 1 , 0 ) , name = 'Sex' )
@@ -70,6 +72,10 @@ embarked.head()
 # Create a new variable for every unique value of Embarked
 pclass = pd.get_dummies( full.Pclass , prefix='Pclass' )
 pclass.head()
+
+
+
+# Age; Fare ---
 
 # Create dataset
 imputed = pd.DataFrame()
@@ -83,6 +89,7 @@ imputed[ 'Fare' ] = full.Fare.fillna( full.Fare.mean() )
 imputed.head()
 
 
+# title ---
 
 title = pd.DataFrame()
 # we extract the title from each name
@@ -119,6 +126,8 @@ title = pd.get_dummies( title.Title )
 title.head()
 
 
+# cabin ---
+
 cabin = pd.DataFrame()
 
 # replacing missing cabins with U (for Uknown)
@@ -132,6 +141,9 @@ cabin = pd.get_dummies( cabin['Cabin'] , prefix = 'Cabin' )
 
 cabin.head()
 
+
+
+# ticket ---
 
 # a function that extracts each prefix of the ticket, returns 'XXX' if no prefix (i.e the ticket is a digit)
 def cleanTicket( ticket ):
@@ -155,6 +167,8 @@ ticket.shape
 ticket.head()
 
 
+# Family ---
+
 family = pd.DataFrame()
 
 # introducing a new feature : the size of families (including the passenger)
@@ -167,10 +181,13 @@ family[ 'Family_Large' ]  = family[ 'FamilySize' ].map( lambda s : 1 if 5 <= s e
 
 family.head()
 
+# all ---
 
 full_X = pd.concat( [ imputed , embarked , cabin , sex ] , axis=1 )
 full_X.head()
 
+
+#-------------------------------------------------------------------------------
 
 # Create all datasets that are necessary to train, validate and test models
 train_valid_X = full_X[ 0:891 ]

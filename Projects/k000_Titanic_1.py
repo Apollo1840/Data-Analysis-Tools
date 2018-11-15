@@ -15,7 +15,7 @@ data_train = pd.read_csv(os.path.dirname(__file__)+'\\datasets\\k000_titanic\\tr
 data_train = pd.read_csv('datasets\\k000_titanic\\train.csv')
 data_test = pd.read_csv('datasets\\k000_titanic\\test.csv')
 
-
+# ---------------------------------------------------------------------------
 # know the data type and missing data
 data_train.info()
 
@@ -57,29 +57,26 @@ if taste_analysis == True:
     plt.show()
 
 
-# primary analysis
-data_train.groupby('Pclass')['Survived'].agg(np.mean).plot('bar')
-
-data_train.groupby('Sex')['Survived'].agg(np.mean).plot('bar')
-
-data_train.groupby('Embarked')['Survived'].agg(np.mean).plot('bar')
-
-data_train.groupby('SibSp')['Survived'].agg(np.mean).plot('bar')
-
-data_train.groupby(['Pclass','Sex'])['Survived'].agg(np.mean).plot('bar')
-
-
-Survived_cabin = data_train.Survived[pd.notnull(data_train.Cabin)].value_counts()
-Survived_nocabin = data_train.Survived[pd.isnull(data_train.Cabin)].value_counts()
-df=pd.DataFrame({'not null':Survived_cabin, 'null':Survived_nocabin}).transpose()
-df.plot(kind='bar', stacked=True)
+    # primary analysis
+    data_train.groupby('Pclass')['Survived'].agg(np.mean).plot('bar')
+    
+    data_train.groupby('Sex')['Survived'].agg(np.mean).plot('bar')
+    
+    data_train.groupby('Embarked')['Survived'].agg(np.mean).plot('bar')
+    
+    data_train.groupby('SibSp')['Survived'].agg(np.mean).plot('bar')
+    
+    data_train.groupby(['Pclass','Sex'])['Survived'].agg(np.mean).plot('bar')
 
 
+    Survived_cabin = data_train.Survived[pd.notnull(data_train.Cabin)].value_counts()
+    Survived_nocabin = data_train.Survived[pd.isnull(data_train.Cabin)].value_counts()
+    df=pd.DataFrame({'not null':Survived_cabin, 'null':Survived_nocabin}).transpose()
+    print(df)
+    df.plot(kind='bar', stacked=True)
 
 
-
-
-
+# ---------------------------------------------------------------------------
 # fill the age
 def fill_null_age_rfr(df):
     columns = ['Age','Fare', 'Parch', 'SibSp', 'Pclass']
@@ -108,11 +105,14 @@ lb = LabelBinarizer()
 lb.fit(list(df.Sex.value_counts().index)).transform(df.Sex)
 '''
 
+from sklearn.preprocessing import StandardScaler
 def data_preprocessing(data_train, rfr):
 
     if np.sum(data_train.Age.isnull()) != 0:
         data_train = fill_null_age(data_train, rfr)
-    data_train.loc[data_train.Fare.isnull(), 'Fare' ] = 0
+    
+    data_train.Fare.fillna(0, inplace=True)
+    # data_train.loc[data_train.Fare.isnull(), 'Fare' ] = 0
     
     dummies_Embarked = pd.get_dummies(data_train['Embarked'], prefix= 'Embarked')
     dummies_Sex = pd.get_dummies(data_train['Sex'], prefix= 'Sex')
@@ -127,7 +127,6 @@ def data_preprocessing(data_train, rfr):
     df.loc[df.Cabin.isnull(), 'Cabin' ] = 0
     
     # Scale the value : Age, Fare
-    from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     
     df['Age_scaled'] = scaler.fit_transform(df.loc[:,'Age'].values.reshape(-1,1))
@@ -144,7 +143,7 @@ df = data_preprocessing(data_train, rfr)
 
 
 
-
+# ---------------------------------------------------------------------------
 # logistic model:
 x_train = df.iloc[:,1:].values
 y_train = df.iloc[:,0].values  
@@ -173,59 +172,8 @@ result = pd.DataFrame({'PassengerId':data_test['PassengerId'].values, 'Survived'
 result.to_csv("datasets\\k000_titanic\\logistic_regression_predictions.csv", index=False)
 
 
-
-
 # improve:
 pd.DataFrame({"columns":list(df.columns)[1:], "coef":list(lr.coef_.T)})
-
-
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import learning_curve
-
-def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, n_jobs=1, 
-                        train_sizes=np.linspace(.05, 1., 20), verbose=0, plot=True):
-    train_sizes, train_scores, test_scores = learning_curve(
-        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes, verbose=verbose)
-
-    train_scores_mean = np.mean(train_scores, axis=1)
-    train_scores_std = np.std(train_scores, axis=1)
-    test_scores_mean = np.mean(test_scores, axis=1)
-    test_scores_std = np.std(test_scores, axis=1)
-
-    if plot:
-        plt.figure()
-        plt.title(title)
-        if ylim is not None:
-            plt.ylim(*ylim)
-        plt.xlabel("number_samples")
-        plt.ylabel("score")
-        plt.gca().invert_yaxis()
-        plt.grid()
-
-        plt.fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, 
-                         alpha=0.1, color="b")
-        plt.fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, 
-                         alpha=0.1, color="r")
-        plt.plot(train_sizes, train_scores_mean, 'o-', color="b", label=u"训练集上得分")
-        plt.plot(train_sizes, test_scores_mean, 'o-', color="r", label=u"交叉验证集上得分")
-
-        plt.legend(loc="best")
-
-        plt.draw()
-        plt.show()
-        plt.gca().invert_yaxis()
-
-    midpoint = ((train_scores_mean[-1] + train_scores_std[-1]) + (test_scores_mean[-1] - test_scores_std[-1])) / 2
-    diff = (train_scores_mean[-1] + train_scores_std[-1]) - (test_scores_mean[-1] - test_scores_std[-1])
-    return midpoint, diff
-
-plot_learning_curve(lr, "learning curve", x_train, y_train)
-
-help(learning_curve)
-
 
 
 

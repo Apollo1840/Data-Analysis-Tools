@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 matplotlib.style.use( 'ggplot' )
 sns.set_style( 'white' )
@@ -60,3 +61,23 @@ def plot_model_var_imp( model , X , y ):
     imp = imp.sort_values( [ 'Importance' ] , ascending = True )
     imp[ : 10 ].plot( kind = 'barh' )
     print (model.score( X , y ))
+    
+def plot_contract_bar(df, colname, target, scaled=False):
+    # df[colname] is a binary column, target is a category column
+    df[colname+'_rev']= 1 - df[colname]
+    the_type = 'mean' if scaled else 'sum'
+    df.groupby(target)[[colname, colname+'_rev']].agg(the_type).plot(kind='bar', figsize=(25, 7),
+                                                        stacked=True, colors=['g', 'r']);
+
+
+def plot_contract_hist(df, colname, target):
+    # df[colname] is a binary column, target is a numeric column
+    plt.hist([df[df[colname] == 1][target], df[df[colname] == 0][target]], 
+         stacked=True, color = ['g','r'],
+         bins = 50)
+    
+def plot_contract_scatter(df, colname, target1, target2):
+    # df[colname] is a category column, targets are numeric columns
+    plt.scatter(df[target1], df[target2],c=df[colname]) 
+
+
