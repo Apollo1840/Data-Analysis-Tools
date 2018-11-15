@@ -63,6 +63,9 @@ del train , test
 print ('Datasets:' , 'full:' , full.shape , 'titanic:' , titanic.shape)
 
 
+
+
+# -----------------------------------------------------------------------------  
 # plot some charts
 
 plot_correlation_map( titanic )
@@ -74,8 +77,11 @@ plot_distribution( titanic , var = 'Age' , target = 'Survived' , row = 'Sex' )
 plot_categories( titanic , cat = 'Embarked' , target = 'Survived' )
 
 
+
+# -----------------------------------------------------------------------------  
+
 '''
-    here it is going to change some attributes to dummies.
+    here it is going to change some attributes.
 
 '''
 # --- sex ---
@@ -173,7 +179,8 @@ family = pd.DataFrame()
 family[ 'FamilySize' ] = full[ 'Parch' ] + full[ 'SibSp' ] + 1
 
 
-# --- all ---
+
+# -----------------------------------------------------------------------------  
 
 # full_X = pd.concat( [ imputed , embarked , cabin , sex ] , axis=1 )
 # full_X.head()
@@ -200,6 +207,8 @@ family[ 'Family_Large' ]  = family[ 'FamilySize' ].apply( lambda s : 1 if 5 <= s
 full_X = pd.concat( [ sex, embarked, pclass, imputed ,title, cabin, ticket, family] , axis=1 )
 print(full_X.columns)
 print(full_X.head())
+
+
 
 #-------------------------------------------------------------------------------
 # preparation
@@ -241,6 +250,19 @@ rfecv.fit( train_x , train_y )
 print(rfecv.score( train_x , train_y ))
 print(rfecv.score( test_x, test_y ))
 
+rfc = RandomForestClassifier(n_estimators=100)
+rfc.fit(train_x, train_y)
+print(rfc.score(train_x, train_y))
+print(rfc.score(test_x, test_y))
+rfc.fit(train_X, train_Y)
+
+
+lr = LogisticRegression(C=2, penalty='l1', tol=1e-8)
+lr.fit(train_x, train_y)
+print(lr.score(train_x, train_y))
+print(lr.score(test_x, test_y))
+lr.fit(train_X, train_Y)
+
 
 
 score = 0
@@ -257,19 +279,19 @@ while(score < 0.78):
 # ------------------------------------------------------------------
 # output
 
-def save_result(model):
+def save_result(model, filename='titanic_pred.csv'):
     test_Y = model.predict( test_X )
     passenger_id = full[891:].PassengerId
     test = pd.DataFrame( { 'PassengerId': passenger_id , 'Survived': test_Y.astype(np.int32) } )
     # test = test.reset_index()
     # test = test.drop(columns = ['index'])
     print(test.info())
-    test.to_csv( DATA_PATH + 'titanic_pred.csv' , index = False )
+    test.to_csv( DATA_PATH + filename , index = False )
 
 
 save_result(rfecv)
-save_result(model)
-
+save_result(rfc,'titanic_pred2.csv')
+save_result(lr,'titanic_pred_lr.csv')
 
 
 
