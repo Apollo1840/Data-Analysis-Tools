@@ -1,298 +1,278 @@
-# Ignore warnings
-import warnings
-warnings.filterwarnings('ignore')
+# -*- coding: utf-8 -*-
 
-# Handle table-like data and matrices
 import numpy as np
 import pandas as pd
-
-# Modelling Algorithms
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC, LinearSVC
-from sklearn.ensemble import RandomForestClassifier , GradientBoostingClassifier
-from sklearn.neural_network import MLPClassifier
-
-# Modelling Helpers
-from sklearn.preprocessing import Imputer , Normalizer , scale
-from sklearn.cross_validation import train_test_split , StratifiedKFold
-from sklearn.feature_selection import RFECV
-
-# Visualisation
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.pylab as pylab
-import seaborn as sns
-
-# Configure visualisations
-mpl.style.use( 'ggplot' )
-sns.set_style( 'white' )
-pylab.rcParams[ 'figure.figsize' ] = 8 , 6
-
-from ploters import plot_distribution, plot_categories, plot_correlation_map,plot_variable_importance
-
-
-DATA_PATH='Projects\\datasets\\k000_titanic\\'
-    
-    
-# -----------------------------------------------------------------------------    
-# get titanic & test csv files as a DataFrame
-
-'''
-    in k000_Titanic_1, it works on train set and deploy the changes on test data.
-    in this one, it combines train and test first.
-
-'''
+from pandas import  DataFrame
+from patsy import dmatrices
+from patsy import dmatrix
+import string
+from operator import itemgetter
+import json
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.cross_validation import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import train_test_split,StratifiedShuffleSplit,StratifiedKFold
+from sklearn import preprocessing
+from sklearn.metrics import classification_report
+from sklearn.externals import joblib
 
 import os
-path = os.getcwd()
-while(os.path.basename(path) != 'Data-Analysis-Tools'):
-    path = os.path.dirname
-os.chdir(path)
+
+def change_dir_to_DAT():
+    path = os.getcwd()
+    while(os.path.basename(path) != 'Data-Analysis-Tools'):
+        path = os.path.dirname(path)
+    os.chdir(path)
     
-train = pd.read_csv(DATA_PATH + 'train.csv')
-test = pd.read_csv(DATA_PATH + 'test.csv')
+change_dir_to_DAT()
 
-full = train.append( test , ignore_index = True )
-titanic = full[ :891 ]
-
-del train , test
-
-print ('Datasets:' , 'full:' , full.shape , 'titanic:' , titanic.shape)
+from pandas_extend import columns_with_na
 
 
+os.chdir(os.getcwd() + '/Projects')
 
+from k000_Titanic_0 import load_data
+from k000_Titanic_0 import save_result
 
-# -----------------------------------------------------------------------------  
-# plot some charts
+data_train, data_test = load_data()
 
-plot_correlation_map( titanic )
-
-# Plot distributions of Age of passangers who survived or did not survive
-plot_distribution( titanic , var = 'Age' , target = 'Survived' , row = 'Sex' )
-
-# Plot survival rate by Embarked
-plot_categories( titanic , cat = 'Embarked' , target = 'Survived' )
+DATA_PATH='\\datasets\\k000_titanic\\'
 
 
 
-# -----------------------------------------------------------------------------  
-
-'''
-    here it is going to change some attributes.
-
-'''
-# --- sex ---
-
-# Transform Sex into binary values 0 and 1
-sex = pd.Series( np.where( full.Sex == 'male' , 1 , 0 ) , name = 'Sex' )
-# sex = full.Sex.map({'male': 1,'female':0})
-
-# --- Age; Fare ---
-
-# Create dataset
-imputed = pd.DataFrame()
-
-# Fill missing values of Age with the average of Age (mean)
-imputed[ 'Age' ] = full.Age.fillna( full.Age.mean() )
-
-# Fill missing values of Fare with the average of Fare (mean)
-imputed[ 'Fare' ] = full.Fare.fillna( full.Fare.mean() )
-
-imputed.head()
-
-
-# --- title ---
-
-title = pd.DataFrame()
-# we extract the title from each name
-full['Name']
-
-title[ 'Title' ] = full[ 'Name' ].map( lambda name: name.split( ',' )[1].split( '.' )[0].strip() )
-title['Title'].value_counts()
-
-# a map of more aggregated titles
-Title_Dictionary = {
-                    "Capt":       "Officer",
-                    "Col":        "Officer",
-                    "Major":      "Officer",
-                    "Jonkheer":   "Royalty",
-                    "Don":        "Royalty",
-                    "Sir" :       "Royalty",
-                    "Dr":         "Officer",
-                    "Rev":        "Officer",
-                    "the Countess":"Royalty",
-                    "Dona":       "Royalty",
-                    "Mme":        "Mrs",
-                    "Mlle":       "Miss",
-                    "Ms":         "Mrs",
-                    "Mr" :        "Mr",
-                    "Mrs" :       "Mrs",
-                    "Miss" :      "Miss",
-                    "Master" :    "Master",
-                    "Lady" :      "Royalty"
-
-                    }
-
-# we map each title
-title[ 'Title' ] = title.Title.map( Title_Dictionary )
-
-# --- cabin ---
-
-cabin = pd.DataFrame()
-
-# replacing missing cabins with U (for Uknown)
-cabin[ 'Cabin' ] = full.Cabin.fillna( 'U' )
-
-# mapping each Cabin value with the cabin letter
-cabin[ 'Cabin' ] = cabin[ 'Cabin' ].apply( lambda c : c[0] )
-
-
-# --- ticket ---
-full.Ticket
-
-# a function that extracts each prefix of the ticket, returns 'XXX' if no prefix (i.e the ticket is a digit)
-def cleanTicket( ticket ):
-    ticket = ticket.replace( '.' , '' )
-    ticket = ticket.replace( '/' , '' )
-    ticket = [t.strip() for t in ticket.split()]
-    ticket = list(filter( lambda t : not t.isdigit() , ticket ))
-    if len( ticket ) > 0:
-        return ticket[0]
-    else: 
-        return 'XXX'
-
-ticket = pd.DataFrame()
-
-# Extracting dummy variables from tickets:
-ticket[ 'Ticket' ] = full[ 'Ticket' ].apply( cleanTicket )
-# ticket[ 'Ticket' ].value_counts()
-
-
-# -- Family ---
-
-family = pd.DataFrame()
-
-# introducing a new feature : the size of families (including the passenger)
-family[ 'FamilySize' ] = full[ 'Parch' ] + full[ 'SibSp' ] + 1
-
-
-
-# -----------------------------------------------------------------------------  
-
-# full_X = pd.concat( [ imputed , embarked , cabin , sex ] , axis=1 )
-# full_X.head()
-
-full_X = pd.concat( [ sex, full.Embarked, full.Pclass, imputed,title, cabin, ticket, family] , axis=1 )
-print(full_X.columns)
-print(full_X.head())
-full_X.to_csv(DATA_PATH +'titanic_data2.csv' )
-
-
-embarked = pd.get_dummies( full.Embarked , prefix='Embarked' )
-pclass = pd.get_dummies( full.Pclass , prefix='Pclass' )
-
-ticket = pd.get_dummies( ticket[ 'Ticket' ] , prefix = 'Ticket' )
-cabin = pd.get_dummies( cabin['Cabin'] , prefix = 'Cabin' )
-title = pd.get_dummies( title.Title, prefix='Title')
-
-# (discretelization) introducing other features based on the family size
-family[ 'Family_Single' ] = family[ 'FamilySize' ].apply( lambda s : 1 if s == 1 else 0 )
-family[ 'Family_Small' ]  = family[ 'FamilySize' ].apply( lambda s : 1 if 2 <= s <= 4 else 0 )
-family[ 'Family_Large' ]  = family[ 'FamilySize' ].apply( lambda s : 1 if 5 <= s else 0 )
-
-
-full_X = pd.concat( [ sex, embarked, pclass, imputed ,title, cabin, ticket, family] , axis=1 )
-print(full_X.columns)
-print(full_X.head())
-
-
-
-#-------------------------------------------------------------------------------
-# preparation
-
-# Create all datasets that are necessary to train, validate and test models
-
-'''
-    train_x, train_y is the train data
-    test_x, test_y is the validation data
+def clean_and_munge_data(df):
+    # 1 PassengerID : x
+    # 2 Plass       : ---
+    # 3 Name        : get title out of Name
+    # 4 Sex         : labelEncoder
+    # 5 Age         : use title to predict age by average, then cut it
+    # 6 SibSp       : combine it with Parch to create family size
+    # 7 Parch       : x
+    # 8 Ticket      : x
+    # 9 Fare        : predict Fare by pclass
+    # 10 Cabin      : diffienciate the passengers by the one who has Cabin info and those who dont
+    # 11 Embarked   : x
     
-    train_all_x, train_all_y is the final training data
+    # this time do not use get_dummies because we going to use dmatrix
     
-    test_X is the data to predict
+    
+    # Title
+    title_list=['Mrs', 'Mr', 'Master', 'Miss', 'Major', 'Rev',
+                'Dr', 'Ms', 'Mlle','Col', 'Capt', 'Mme', 'Countess',
+                'Don', 'Jonkheer']
+    df['Title']=df['Name'].apply(lambda x: substrings_in_string(x, title_list))
 
-'''
+    # all to mr, mrs, miss, master
+    def replace_titles(x):
+        title=x['Title']
+        if title in ['Mr','Don', 'Major', 'Capt', 'Jonkheer', 'Rev', 'Col']:
+            return 'Mr'
+        elif title in ['Master']:
+            return 'Master'
+        elif title in ['Countess', 'Mme','Mrs']:
+            return 'Mrs'
+        elif title in ['Mlle', 'Ms','Miss']:
+            return 'Miss'
+        elif title =='Dr':
+            if x['Sex']=='Male':
+                return 'Mr'
+            else:
+                return 'Mrs'
+        elif title =='':
+            if x['Sex']=='Male':
+                return 'Master'
+            else:
+                return 'Miss'
+        else:
+            return title
+
+    df['Title']=df.apply(replace_titles, axis=1)
+    
+    
+    # Age
+    df.loc[ (df.Age.isnull()) & (df.Title == 'Miss') ,'Age'] = np.average(df[df['Title'] == 'Miss']['Age'].dropna())
+    df.loc[ (df.Age.isnull()) & (df.Title == 'Mrs') ,'Age'] = np.average(df[df['Title'] == 'Mrs']['Age'].dropna())
+    df.loc[ (df.Age.isnull()) & (df.Title == 'Mr') ,'Age'] = np.average(df[df['Title'] == 'Mr']['Age'].dropna())
+    df.loc[ (df.Age.isnull()) & (df.Title == 'Master') ,'Age'] = np.average(df[df['Title'] == 'Master']['Age'].dropna())
+    
+    df['AgeCat'] = df['Age']
+    df.loc[ (df.Age<=10) ,'AgeCat'] = 'child'
+    df.loc[ (df.Age>60),'AgeCat'] = 'aged'
+    df.loc[ (df.Age>10) & (df.Age <=30) ,'AgeCat'] = 'adult'
+    df.loc[ (df.Age>30) & (df.Age <=60) ,'AgeCat'] = 'senior'
+    # df['AgeCat']=pd.cut(df['Age'], bins=[0, 10, 30, 60, 120], labels=['child', 'adult', 'senior', 'aged']
+    
+    
+    # Family
+    df['Family_Size']=df['SibSp'] + df['Parch']
+    
+    # Fare
+    df.Fare = df.Fare.apply(lambda x: np.nan if x==0 else x)
+    df.loc[ (df.Fare.isnull())&(df.Pclass==1),'Fare'] = np.median(df[df['Pclass'] == 1]['Fare'].dropna())
+    df.loc[ (df.Fare.isnull())&(df.Pclass==2),'Fare'] = np.median(df[df['Pclass'] == 2]['Fare'].dropna())
+    df.loc[ (df.Fare.isnull())&(df.Pclass==3),'Fare'] = np.median(df[df['Pclass'] == 3]['Fare'].dropna())
+
+    # Cabin
+    df.loc[df.Cabin.notnull(), 'Cabin' ] = 1
+    df.loc[df.Cabin.isnull(), 'Cabin' ] = 0
+
+    
+    # new attributes:
+    df['Fare_Per_Person']=df['Fare']/(df['Family_Size']+1)
+    df['AgeClass']=df['Age']*df['Pclass']
+    df['ClassFare']=df['Pclass']*df['Fare_Per_Person']
+    
+    df['HighLow']=df['Pclass']
+    df.loc[ (df.Fare_Per_Person<8) ,'HighLow'] = 'Low'
+    df.loc[ (df.Fare_Per_Person>=8) ,'HighLow'] = 'High'
+
+
+    # labelEncode the attributes
+    le = preprocessing.LabelEncoder()
+    # enc=preprocessing.OneHotEncoder()
+    
+    df['Sex']=le.fit_transform(df['Sex'])
+    df['Title']=le.fit_transform(df['Title'])
+    df['AgeCat']=le.fit_transform(df['AgeCat'])
+
+    return df
+
+
+def substrings_in_string(big_string, substrings):
+    'return the first substring in string, or np.nan'
+    
+    for substring in substrings:
+        if str.find(big_string, substring) != -1:
+            return substring
+    print(big_string)
+    return np.nan
 
 
 
-train_X = full_X[ 0:891 ]
-train_Y = titanic.Survived.values.reshape(-1,1)
-test_X = full_X[ 891: ]
-train_x , test_x , train_y , test_y = train_test_split( train_X , train_Y , train_size = .7 )
 
-print(full_X.shape , train_X.shape, train_Y.shape, test_X.shape)
-print(train_x.shape , train_y.shape , test_x.shape, test_y.shape)
+#  prepare the data for training 
+    
+full_X = data_train.append(data_test)
+df = clean_and_munge_data(full_X)
 
+formula_ml='Pclass+C(Title)+Sex+C(AgeCat)+Fare_Per_Person+Fare+Family_Size' 
+# formula_ml='Survived~Pclass+C(Title)+Sex+C(AgeCat)+Fare_Per_Person+Fare+Family_Size' 
+# train_Y, train_X = dmatrices(formula_ml, data=df, return_type='dataframe')
+# see https://patsy.readthedocs.io/en/latest/formulas.html#formulas
+# C means change it to dummies
 
-# plot_variable_importance(train_X, train_y)
+all_x = dmatrix(formula_ml, data=df, return_type='dataframe')
 
+train_X = all_x[:891] 
+train_Y = data_train.Survived
+test_X = all_x[891:] 
 
-# modeling ------------------------------------------------------------------
-
-
-model = RandomForestClassifier(n_estimators=100)
-# model = GradientBoostingClassifier()
-# model = LogisticRegression(C=0.5, penalty='l2', tol=1e-9)
-rfecv = RFECV( estimator = model , step = 1 , cv = StratifiedKFold( train_y , 2 ) , scoring = 'accuracy' )
-rfecv.fit( train_x , train_y )
-print(rfecv.score( train_x , train_y ))
-print(rfecv.score( test_x, test_y ))
-
-rfc = RandomForestClassifier(n_estimators=100)
-rfc.fit(train_x, train_y)
-print(rfc.score(train_x, train_y))
-print(rfc.score(test_x, test_y))
-rfc.fit(train_X, train_Y)
+train_x, test_x, train_y, test_y = train_test_split(train_X, train_Y, test_size=0.2)
 
 
-lr = LogisticRegression(C=2, penalty='l1', tol=1e-8)
+# ----------------------------------------------------------------------------------
+# modeling 
+print('logistic regression')
+from sklearn.linear_model import LogisticRegression 
+lr = LogisticRegression(C=1,tol=1e-8)
 lr.fit(train_x, train_y)
-print(lr.score(train_x, train_y))
-print(lr.score(test_x, test_y))
-lr.fit(train_X, train_Y)
+
+model = lr
+print(model.score(train_x, train_y))
+print(model.score(test_x, test_y))
+
+model.fit(train_X, train_Y)
+save_result('predition_lr_strange', model, test_X)
 
 
 
-score = 0
-while(score < 0.78):
-    model = MLPClassifier((300,100,50), activation = 'tanh', tol=10e-6)
-    model.fit( train_x , train_y )
-    model.fit( train_x , train_y )
-    model.fit( train_x , train_y )
-    print(model.score( train_x , train_y ))
-    print(model.score( test_x , test_y ))
-    score = model.score( test_x , test_y )
+print('grid Search')
+param_grid = {'lr__C': [1e-1, 1.0, 10, 1e2, 1e3, 1e4, 1e5]}
+pipeline=Pipeline([ ('lr',lr) ])
+grid_search = GridSearchCV(pipeline, param_grid=param_grid, verbose=3,scoring='accuracy',
+cv=StratifiedShuffleSplit(train_Y.values.ravel(), n_iter=10, test_size=0.2, train_size=None)).fit(train_X, train_Y.values.ravel())
+
+print("Best score: %0.3f" % grid_search.best_score_)
+print(grid_search.best_estimator_)
+# report(grid_search.grid_scores_)
+
+model = grid_search.best_estimator_
+print(model.score(train_x, train_y))
+print(model.score(test_x, test_y))
+
+model.fit(train_X, train_Y)
+save_result('predition_lr_grid_strange', model, test_X)
 
 
-# ------------------------------------------------------------------
-# output
+# more for grid_search
 
-def save_result(model, filename='titanic_pred.csv'):
-    test_Y = model.predict( test_X )
-    passenger_id = full[891:].PassengerId
-    test = pd.DataFrame( { 'PassengerId': passenger_id , 'Survived': test_Y.astype(np.int32) } )
-    # test = test.reset_index()
-    # test = test.drop(columns = ['index'])
-    print(test.info())
-    test.to_csv( DATA_PATH + filename , index = False )
+# report grid_score
+def report(grid_scores, n_top=3):
+    top_scores = sorted(grid_scores, key=itemgetter(1), reverse=True)[:n_top]
+    for i, score in enumerate(top_scores):
+        print("Model with rank: {0}".format(i + 1))
+        print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+              score.mean_validation_score,
+              np.std(score.cv_validation_scores)))
+        print("Parameters: {0}".format(score.parameters))
+        print("")
 
 
-save_result(rfecv)
-save_result(rfc,'titanic_pred2.csv')
-save_result(lr,'titanic_pred_lr.csv')
+clf=RandomForestClassifier(n_estimators=500, criterion='entropy', max_depth=5, min_samples_split=1.0,
+  min_samples_leaf=1, max_features='auto', bootstrap=False, oob_score=False, n_jobs=1,
+  verbose=0)
 
+
+
+param_grid = dict()
+pipeline=Pipeline([ ('clf',clf) ])
+grid_search = GridSearchCV(pipeline, param_grid=param_grid, verbose=3,scoring='accuracy',
+cv=StratifiedShuffleSplit(train_Y, n_iter=10, test_size=0.2, train_size=None)).fit(train_X, train_Y)
+
+print("Best score: %0.3f" % grid_search.best_score_)
+print(grid_search.best_estimator_)
+report(grid_search.grid_scores_)
+
+
+''' 
+print('-----grid search end------------')
+print ('on all train set')
+scores = cross_val_score(grid_search.best_estimator_, train_x, train_y, cv=3,scoring='accuracy')
+print (scores.mean(), scores)
+print ('on test set')
+scores = cross_val_score(grid_search.best_estimator_, test_x, test_y, cv=3,scoring='accuracy')
+print (scores.mean(), scores)
+
+
+print(classification_report(Y_train, grid_search.best_estimator_.predict(X_train) ))
+print('test data')
+print(classification_report(Y_test, grid_search.best_estimator_.predict(X_test) ))
+
+model_file=MODEL_PATH+'model-rf.pkl'
+joblib.dump(grid_search.best_estimator_, model_file)
+'''
+
+# grid_search.best_estimator_.fit(train_X, train_Y)
+save_result('predition_gs_strange', grid_search.best_estimator_, test_X)
+
+
+
+'''
+print('bagging regression')
+
+from sklearn.ensemble import BaggingRegressor
+
+lr = LogisticRegression(C=1.0,  tol=1e-5)
+bagging_clf = BaggingRegressor(lr, n_estimators=20, max_samples=0.9, max_features=1.0, n_jobs=-1) 
+# here we can even set bootstrap=false to get duplicate samples
+bagging_clf.fit(train_x, train_y)
+
+
+model = bagging_clf
+print(model.score(train_x, train_y))
+print(model.score(test_x, test_y))
+'''
 
 
 

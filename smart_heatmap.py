@@ -105,3 +105,10 @@ if __name__=='__main':
     
     df2.iloc[:,1:].values
     df2.shape
+    
+    
+    
+
+    
+
+    

@@ -14,3 +14,9 @@ sns.violinplot(x='Sex', y='Age',
                split=True,
                palette={0: "r", 1: "g"}
               );
+
+
+
+sns.distplot(data_train.SalesPrice)
+
+sns.pairplot(data_train)

@@ -10,6 +10,12 @@ def choose_columns(df, dt_type='float64'):
     
     return list(df.iloc[0:1,:].select_dtypes(include = dt_type).columns)
 
+
+def columns_with_na(df):
+    # return names of columns who has NA
+    
+    return list(df.columns[df.isna().any()])
+
 def quantile_cut_column(df, column_name, quantile_ratio=[0,0.2,0.4,0.6,0.8,1], labels = ['small','medium-small','medium','medium-large','large']):
     # cut the column by quantile, returns the new df (with a new column  '..._level')
     
