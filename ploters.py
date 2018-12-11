@@ -13,23 +13,6 @@ import numpy as np
 matplotlib.style.use( 'ggplot' )
 sns.set_style( 'white' )
 
-def plot_distribution( df , var , target , **kwargs ):
-    row = kwargs.get( 'row' , None )
-    col = kwargs.get( 'col' , None )
-    facet = sns.FacetGrid( df , hue=target , aspect=4 , row = row , col = col )
-    facet.map( sns.kdeplot , var , shade= True )
-    facet.set( xlim=( 0 , df[ var ].max() ) )
-    facet.add_legend()
-    
-
-def plot_categories( df , cat , target , **kwargs ):
-    row = kwargs.get( 'row' , None )
-    col = kwargs.get( 'col' , None )
-    facet = sns.FacetGrid( df , row = row , col = col )
-    facet.map( sns.barplot , cat , target )
-    facet.add_legend()
-
-
 def plot_correlation_map( df ):
     corr = df.corr()
     _ , ax = plt.subplots( figsize =( 12 , 10 ) )
@@ -43,6 +26,70 @@ def plot_correlation_map( df ):
         annot = True, 
         annot_kws = { 'fontsize' : 12 }
     )
+
+
+# single column
+    
+def plot_value_counts(df, column_name):   
+    plt.title('the value counts of {}'.format(column_name))
+    df[column_name].value_counts().plot(kind='bar')
+    plt.xlabel(column_name)  
+    plt.show()
+
+
+
+
+# Kde
+
+def plot_kde_on(df, kde_column_name, category_column_name):
+    plt.title('{} and {}'.format(kde_column_name, category_column_name))
+    for label in df[category_column_name].unique():
+        df.loc[df[category_column_name] == label, kde_column_name].plot(kind='kde')   
+    plt.xlabel(kde_column_name) # plots an axis lable
+    plt.ylabel("density") 
+    plt.legend(df[category_column_name].unique(),loc='best') # sets our legend for our graph.
+    plt.show()
+
+def plot_distribution( df , var , target , **kwargs ):
+    row = kwargs.get( 'row' , None )
+    col = kwargs.get( 'col' , None )
+    facet = sns.FacetGrid( df , hue=target , aspect=4 , row = row , col = col )
+    facet.map( sns.kdeplot , var , shade= True )
+    facet.set( xlim=( 0 , df[ var ].max() ) )
+    facet.add_legend()
+    
+
+
+def plot_categories( df , cat , target , **kwargs ):
+    row = kwargs.get( 'row' , None )
+    col = kwargs.get( 'col' , None )
+    facet = sns.FacetGrid( df , row = row , col = col )
+    facet.map( sns.barplot , cat , target )
+    facet.add_legend()
+
+
+    
+def plot_category_by_NA(df, mis_col,cate_col):
+    # mis_col means the name of the column which has NA value, cate_col is the category column
+    withit = df.loc[pd.notnull(df[mis_col]), cate_col].value_counts()
+    without = df.loc[pd.isnull(df[mis_col]), cate_col].value_counts()
+    pd.DataFrame({'not null': withit, 'null': without}).transpose().plot(kind='bar', stacked=True)
+
+
+def plot_stacked_barchart(df, xcol, ycol, normalized=False):
+    # xcol, ycol are column names
+    # assume the number of rows is the val_col (value_column)
+    
+    smalldf = pd.get_dummies(df[ycol],prefix=ycol)
+    smalldf = pd.concat([df[xcol], smalldf], axis=1)
+    if normalized:
+        smalldf.groupby(xcol).agg(np.mean).plot(kind='bar', stacked=True)
+    else:
+        smalldf.groupby(xcol).agg(np.sum).plot(kind='bar', stacked=True)
+
+
+
+
 
 
 
@@ -79,5 +126,9 @@ def plot_contract_hist(df, colname, target):
 def plot_contract_scatter(df, colname, target1, target2):
     # df[colname] is a category column, targets are numeric columns
     plt.scatter(df[target1], df[target2],c=df[colname]) 
+
+
+
+
 
 
