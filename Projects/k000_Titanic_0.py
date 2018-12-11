@@ -131,13 +131,25 @@ def draw_plots():
 
     data = data_train.copy()
     
-    from ploters import plot_stacked_barchart
+    df = data
+    plt.scatter(df['Age'], df['Fare'], c=df['Survived'], s=df['Fare'], cmap='seismic', alpha=0.8) 
+    #https://matplotlib.org/examples/color/colormaps_reference.html
     
+    from ploters import StackedPloter
+    sp = StackedPloter(data)
+
     # some plots   
-    plot_stacked_barchart(data, 'Sex', 'Survived')
+    sp.plot('Sex', 'Survived')
+    
+    plt.figure()
+    sp.plot('Fare', 'Survived')
     
     
-    fig = plt.figure(figsize=(25, 7))
+    
+    
+    sns.violinplot(x='Embarked', y='Fare', hue='Survived', data=data, palette={0: "r", 1: "g"})
+        fig = plt.figure(figsize=(25, 7))
+    
     sns.violinplot(x='Sex', y='Age', hue='Survived', 
                    data=data, 
                    split=True,
@@ -145,34 +157,6 @@ def draw_plots():
     # it is like plot distribution with row=x, var=y, target=hue
     # personal perfers the plot_distribution
     
-    
-    plt.hist([data[data['Survived'] == 1]['Fare'], data[data['Survived'] == 0]['Fare']], 
-             stacked=True, color = ['g','r'],
-             bins = 50, label = ['Survived','Dead'])
-    plt.xlabel('Fare')
-    plt.ylabel('Number of passengers')
-    plt.legend()
-    
-    
-    
-    ax = plt.subplot()    
-    ax.scatter(data[data['Survived'] == 1]['Age'], data[data['Survived'] == 1]['Fare'], 
-               c='green', s=data[data['Survived'] == 1]['Fare'])
-    ax.scatter(data[data['Survived'] == 0]['Age'], data[data['Survived'] == 0]['Fare'], 
-               c='red', s=data[data['Survived'] == 0]['Fare'])
-    
-    
-    
-    
-    ax = plt.subplot()
-    ax.set_ylabel('Average fare')
-    data.groupby('Pclass').mean()['Fare'].plot(kind='bar', figsize=(25, 7), ax = ax)
-    
-    
-    
-    
-    fig = plt.figure(figsize=(25, 7))
-    sns.violinplot(x='Embarked', y='Fare', hue='Survived', data=data, split=True, palette={0: "r", 1: "g"})
 
 
 
