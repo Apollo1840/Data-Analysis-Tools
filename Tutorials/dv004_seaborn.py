@@ -20,3 +20,14 @@ sns.violinplot(x='Sex', y='Age',
 sns.distplot(data_train.SalesPrice)
 
 sns.pairplot(data_train)
+
+
+sns.set(style='white', context='notebook', palette='deep')
+g = sns.countplot(Y_train)
+
+
+
+# heatmap
+# https://seaborn.pydata.org/generated/seaborn.heatmap.html
+import seaborn as sns
+ax = sns.heatmap(uniform_data)

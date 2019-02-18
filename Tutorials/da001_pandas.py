@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # 0.2 read
     
     # read dataFrame
-    df2 = pd.read_excel('datasets/sample.xlsx')
+    df2 = pd.read_excel('Projects/datasets/sample.xlsx')
     print(df2)
     
     # read a part of csv
@@ -55,8 +55,9 @@ if __name__ == '__main__':
     print(df1.describe(include=[np.number]))
     df1['x','y'].describe()
 
-    print(df1.dtypes)
     print(df1.info())  # dtypes + exists null or not
+    print(df1.dtypes)
+    
     
     # plot the dataframe
     df1.plot()  # it plots as row number is x axis, each column is a instance
@@ -72,7 +73,14 @@ if __name__ == '__main__':
     
 
 
-
+    '''
+    小结：
+        这里有三种初始化一个DataFrame的方法： matrix, dictionary 和 read
+        可以用describe, info, dtypes来查看df的最基本信息
+        用plot就可以方便的可视化
+        values, shape是基本操作
+    
+    '''
 
 
 
@@ -132,6 +140,12 @@ if __name__ == '__main__':
     
     
     
+    '''
+    小结：    
+        select的时候使用 loc 和 iloc 就好了
+        row select 记住 index 的用法,和多种条件式
+        column select 记住 select_dtypes
+    '''
     
     
     
@@ -160,15 +174,15 @@ if __name__ == '__main__':
         
     # 2.2 - delete row
     
-    df2.drop(index=[0,1])
     df2.drop([0,1], axis=0)
+    # df2.drop(index=[0,1])
     
     # 1) drop NA:
     df1.dropna()
     df1.dropena(how='any') # default
     df1.dropna(how='all')
     df1.dropna(thresh=2)
-    df1.dropna(subset=['x', 'y'])  # only focus on some columns
+    df1.dropna(subset=['x', 'y'])  # only focus on some columns, any()
     
     print(df1)  # this do not change
     
@@ -186,6 +200,8 @@ if __name__ == '__main__':
     df1.dropna(subset=['x', 'y'])
     df1.drop_duplicates(subset=['id', 'x'])
     
+    print(df1)  # this do not change
+    
     # 2.3 - add column
     
     df2['gender']=['m','f','m',np.nan,'m','f']
@@ -194,12 +210,28 @@ if __name__ == '__main__':
     print(pd.concat([df1, df1], axis=1))  
     
     # 2.4 - delete column   
-    
-    df2.drop(columns = ['code'])
+
     df2.drop(['code'], axis=1)
+    #df2.drop(columns = ['code']) 
+    
     del df2['code']
     
     df1.dropna(axis='columns')  # drop the columns which contains NA
+    
+    
+        
+    '''
+    小结：
+        添加和删除行列就记住 concat 和 drop 搭配 axis
+        关于添加行 还有一个 append, 可以处理 dictionary 和 series
+        关于 NA 和 duplicates >
+            drop_...(subset=)
+            drop_na: how, thresh, fillna(method=)
+            drop_duplicates: keep
+    
+    '''
+    
+    
 
     # 2.5 - column name
     
@@ -210,6 +242,13 @@ if __name__ == '__main__':
     df2.columns = ['name','code','note','pass']
     df3 = df2.rename(columns={'note': 'notes'})
     print(df3)
+    
+
+    
+    
+    
+    
+    
     
     
     
@@ -255,7 +294,7 @@ if __name__ == '__main__':
     
     you can make the category ordered by:
         labels_quality = ['bad','middle','good']
-        df.level = pd.cut(df.quality, bins = 5, labels=labels_quality)
+        df.level = pd.cut(df.quality, bins = 3, labels=labels_quality)
         df.level.astype('category', categories=labels_quality, ordered=True)
     
     then:
@@ -280,9 +319,16 @@ if __name__ == '__main__':
     print(df2.land.unique())   
     print(df2.land.nunique()) 
     print(df2.age.value_counts())
+    print(df2.age.value_counts(dropna=False))
     print(df2.age.value_counts(normalize=True))
     
     
+
+
+
+
+
+
 
  
 
@@ -293,7 +339,7 @@ if __name__ == '__main__':
     print(df2.sort_values(by=['pass', 'notes'])) # return type, logically first pass then notes
     print(df2)  # this do not change
     
-    print(df2.sort_values(by=['pass', 'notes'],ascending=False, na_position='first')) # return type, logically first pass then notes
+    print(df2.sort_values(by=['pass', 'notes'], ascending=False, na_position='first')) # return type, logically first pass then notes
     
     df2.sort_index()
     
@@ -315,12 +361,12 @@ if __name__ == '__main__':
             'humid': [12,23,14,10]
             })
     
-    pd.merge(dfl,dfr, on='city')
+    pd.merge(dfl, dfr, on='city')
     # pd.merge(dfl, dfr, left_on='city', right_on='city')
-    pd.merge(dfl,dfr, on='city', how='outer')
-    pd.merge(dfl,dfr, on='city', how='left')
+    pd.merge(dfl, dfr, on='city', how='outer')
+    pd.merge(dfl, dfr, on='city', how='left')
     
-    pd.merge(dfl,dfc, on='city', how='outer')
+    pd.merge(dfl, dfc, on='city', how='outer')
     
     # merge 2 tables with same columns will cause duplicate columns
     def merge_without_duplicate(df1,df2,on,how):
@@ -339,7 +385,12 @@ if __name__ == '__main__':
     
     '''
      pandas has its default 'Grouper' like 'Every Month' especially for date.
-    
+     like: 
+         df.groupby(Grouper(key='date', freq='60s'))   
+         df.groupby(['name', pd.Grouper(key='date', freq='M')])['ext price'].sum()
+         df.groupby(['name', pd.Grouper(key='date', freq='A-DEC')])['ext price'].sum()  # end of a year
+         
+         more info: http://pandas.pydata.org/pandas-docs/stable/timeseries.html
     '''
     
     # make the result to be normal dataframe for further development
@@ -371,12 +422,18 @@ if __name__ == '__main__':
     
    
     
+    
+    
+    
+    
+    
+    
     # ------------------------------------------------------------------------
     # 5 - trick
     
     # 5.1 transform the column
     df2.name.isnull()  # return a new boolean column, in which NA is False
-    df2.isnull(subset=[])
+    df2.isna().any(axis=1)
     df2.name.duplicated(keep=None)  # default is keep = 'first'
     
     
@@ -398,6 +455,7 @@ if __name__ == '__main__':
     pd.cut(df1.x, bins=4)
     pd.cut(df1.x, [0,3,6,9,12], labels=['a','b','c','d'])
     
+    
     # 5.3 split the column
     'zou congyu'.split(' ')
     df2['supervisor']=['Feng Shangsu','Zou Congyu','Oh Sehun','S Zuu', 'de dfad','tr saf']
@@ -417,6 +475,7 @@ if __name__ == '__main__':
     
     # more abstract:
     # (condition).map({True:x, False:y})
+    
     
     # 5.6 work with datetime
     # This part is from Markham: https://github.com/justmarkham/pandas-videos/blob/master/pandas.ipynb
@@ -473,6 +532,12 @@ if __name__ == '__main__':
     
     # df2['pass'] = df2['pass'].astype('object')
     pd.get_dummies(df2['pass'], prefix='ps')
+    
+    
+    
+    
+    
+    
     
     
     # ----------------------------------------------------------------------

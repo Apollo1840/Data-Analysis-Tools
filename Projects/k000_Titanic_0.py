@@ -145,8 +145,6 @@ def draw_plots():
     sp.plot('Fare', 'Survived')
     
     
-    
-    
     sns.violinplot(x='Embarked', y='Fare', hue='Survived', data=data, palette={0: "r", 1: "g"})
         fig = plt.figure(figsize=(25, 7))
     
