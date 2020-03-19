@@ -8,6 +8,8 @@ the name of this repo is Data-Analysis-Tools, but it actually contains the whole
 | data_wrangling | From very raw data to some usable and easy-to-understand raw data |  
 | data_analysis | From raw data to some easy-to-visualize or machine-learning-ready data.|
 | data_visualization |  Visualize the data. | 
+| datasets | Datasets to play with over those folders. |
+| projects | Very domain-specific data analysis prjects |
 
 <br/>
 <br/>
