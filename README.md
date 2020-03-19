@@ -6,7 +6,7 @@ the name of this repo is Data-Analysis-Tools, but it actually contains the whole
 | folder  | meaning  |  
 |---|---| 
 | data_wrangling | From very raw data to some usable and easy-to-understand raw data |  
-| data_analysis | From raw data to some easy to visualize or machine-learning-ready data.|
+| data_analysis | From raw data to some easy-to-visualize or machine-learning-ready data.|
 | data_visualization |  Visualize the data. | 
 
 <br/>
@@ -18,7 +18,7 @@ the name of this repo is Data-Analysis-Tools, but it actually contains the whole
 ## Theory
 ### 0, how to do data analysis
 
-Theorically is : Preparation - Preporcessing - analysis - posprocessing
+> Preparation -> Preporcessing -> analysis -> posprocessing
 
 To my understanding is : 
 
@@ -64,5 +64,5 @@ For this we need varies of data visualization skills.
 
 # Related Project
 
-Project Athena:
+**Project Athena**:
 AI-based automotive data analysis tool which acts like an experienced data scientist, tells you important facts in the dataframe, interact with you to make conclusions and predictions.
