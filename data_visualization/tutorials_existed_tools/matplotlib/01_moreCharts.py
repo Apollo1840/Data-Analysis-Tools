@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------
 # 0 prepare data to visualize
-x = np.random.randn(20)*10 + 20
+x = np.random.randn(20) * 10 + 20
 x = np.sort(x)
 x = x.reshape(10, 2)
 print(x)
@@ -17,8 +17,8 @@ df.head()
 
 # --------------------------------------------------------------------------
 # 1 matshow
-plt.matshow([[True,False,True,True,False]], cmap='gray_r')
-plt.matshow([[1,2,3],[4,5,6]], cmap='gray_r')
+plt.matshow([[True, False, True, True, False]], cmap='gray_r')
+plt.matshow([[1, 2, 3], [4, 5, 6]], cmap='gray_r')
 plt.colorbar()
 plt.show()
 
