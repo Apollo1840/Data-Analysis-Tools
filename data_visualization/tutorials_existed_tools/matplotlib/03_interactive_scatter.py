@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 plt.style.use('seaborn')
 
+%matplotlib tk
 
 class MontainPoint:
     def __init__(self, x, y, hue=None, signal=None):
