@@ -1,3 +1,14 @@
+"""
+
+extension of matplotlib, in seaborn API style.
+
+mustly in interactive field
+
+
+todo: rename to starborn
+
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
