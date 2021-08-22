@@ -76,13 +76,14 @@ def iscatter_simple(x, y, data, signals):
     return _scatter(star_points)
 
 
-def iscatter(x, y, hue=None, data=None, signals=None):
+def iscatter(x, y, hue=None, data=None, signals=None, custom_star=StarPoint):
     """
 
     :param x: str
     :param y: str
     :param data: pd.DataFrame
     :param signals: list[list], list of signals row(x, y) present.
+    :param custom_star: StarPoint,
     """
 
     # todo: look seaborn scatter code to figure out how to implement hue
@@ -112,10 +113,10 @@ def iscatter(x, y, hue=None, data=None, signals=None):
     # initialize moutain point objects
     star_points = []
     for i in range(len(x_values)):
-        starp = StarPoint(x=x_values[i],
-                          y=y_values[i],
-                          hue=hues[i],
-                          signal=signals[i])
+        starp = custom_star(x=x_values[i],
+                            y=y_values[i],
+                            hue=hues[i],
+                            signal=signals[i])
         star_points.append(starp)
 
     return _scatter(star_points)

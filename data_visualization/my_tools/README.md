@@ -2,12 +2,9 @@
 
 | Package  | Usage  |  
 |---|---| 
-| pyecharts_tool | build based on pyecharts, extends its functionality |  
-| landborn | extention of matplotlib, in seaborn API style |
-| starborn | interactive data visualization. | 
-| datasets | Datasets to play with over those folders. |
-| projects | Very domain-specific data analysis prjects |
-
+| pyecharts_tool | Build based on pyecharts, extends its functionality |  
+| landborn | Extention of seaborn, developed based on matplotlib |
+| starborn | Interactive data visualization tool. |
 
 ### Landborn
 
@@ -20,4 +17,7 @@ see `landborn.ipynb`.
 
 see `starborn.ipynb`.
 
-    
+```python
+    iscatter("x", "y", data=df, signals=points)
+    # iscatter("pre_rr", "post_rr", data=df, signals=heartbeats, custom_star=HeartbeatPoint)
+```
