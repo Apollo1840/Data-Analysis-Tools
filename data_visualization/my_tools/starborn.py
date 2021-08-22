@@ -2,109 +2,128 @@
 
 extension of matplotlib, in seaborn API style.
 
+mustly in interactive field
+
+
+todo: rename to starborn
+
 """
 
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.colors as mplcolor
 
-# very good learn example
-color_map = mplcolor.LinearSegmentedColormap(
-    "my_map",
-    {
-        "red": [(0, 1.0, 1.0),
-                (1.0, .5, .5)],
-        "green": [(0, 0.5, 0.5),
-                  (1.0, 0, 0)],
-        "blue": [(0, 0.50, 0.5),
-                 (1.0, 0, 0)]
-    }
-)
+plt.style.use('seaborn')
 
 
-def barplot_colorbar(x, y, color, data):
-    """
-    plot the bar chart, whos bar color is some source of information with
+class LandPointObj:
 
-    :params: x: str
-    :params: y: str
-    :params: color: str
-    :params: data: pd.DataFrame
+    def __init__(self, x, y, hue=None, signal=None):
+        self.x = x
+        self.y = y
+        self.hue = hue
+        self.signal = signal
 
-    """
+        # assigned externally
+        self.info_dict = None
 
-    data_normalizer = mplcolor.Normalize()
+    def plot(self, axis):
+        axis.cla()
+        axis.plot(self.signal)
+        plt.show()
 
-    color_map = mplcolor.LinearSegmentedColormap.from_list("my_map", ["g", "r"])
-    """
-    color_map = mplcolor.LinearSegmentedColormap(
-        "my_map",
-        segmentdata={'red': [(0.0, 0.0, 0.0),
-                             (0.5, 1.0, 1.0),
-                             (1.0, 1.0, 1.0)],
 
-                     'green': [(0.0, 0.0, 0.0),
-                               (0.25, 0.0, 0.0),
-                               (0.75, 1.0, 1.0),
-                               (1.0, 1.0, 1.0)],
+class HeartbeatPointObj(LandPointObj):
 
-                     'blue': [(0.0, 0.0, 0.0),
-                              (0.5, 0.0, 0.0),
-                              (1.0, 1.0, 1.0)]}
-    )
-    
-    """
+    def plot(self, axis):
+        axis.cla()
 
-    x_value = data[x]
-    y_value = data[y]
-    c_value = data[color]
+        beat_ws = 500  # 500 from long_reference_beats
+        beat_fs = 360
+        axis.plot(list((np.arange(len(self.signal)) - beat_ws) * 1000 / beat_fs), self.signal, "-")
+        axis.axvline(-90 * 1000 / beat_fs, color="r", ls=":")
+        axis.axvline(90 * 1000 / beat_fs, color="r", ls=":")
+        axis.set_title(
+            "{} (pre_rr: {:.2f}, post_rr: {:.2f}, local_rr: {:.2f})".format(
+                self.info_dict["threechar_label"],
+                self.info_dict["pre_rr"],
+                self.info_dict["post_rr"],
+                self.info_dict["local_rr"])
+        )
+        plt.show()
 
-    plt.bar(list(range(len(x_value))),
-            y_value,
-            align="center",
-            color=color_map(data_normalizer(c_value)))
 
-    plt.xticks(list(range(len(x_value))), x_value)
+def landborn_scatter_simple(x, y, data, signals):
+
+    assert len(data[x]) == len(signals)
+
+    x_values = list(data[x])
+    y_values = list(data[y])
+    lp_objs = []
+    for i in range(len(data[x])):
+        lp_objs.append(LandPointObj(x=x_values[i],
+                                       y=y_values[i],
+                                       signal=signals[i]))
+
+    return landborn_scatter(lp_objs)
+
+
+def scatter(x, y, hue=None, data=None, signals=None):
+    # todo: look seaborn scatter code to figure out how to implement hue
+
+    # inputs handling
+
+    if data is not None:
+        x_values = list(data[x])
+        y_values = list(data[y])
+
+    else:
+        x_values = x
+        y_values = y
+
+    if hue is None:
+        hues = ["ro" for _ in range(len(x_values))]
+    elif data is None:
+        hues = hue
+    else:
+        hues = list(data[hue])
+
+    if signals is not None:
+        assert len(x_values) == len(signals)
+    else:
+        signals = [(x, y) for x, y in zip(x_values, y_values)]
+
+    # initialize moutain point objects
+    lp_objs = []
+    for i in range(len(x_values)):
+        lp_obj = LandPointObj(x=x_values[i],
+                                 y=y_values[i],
+                                 hue=hues[i],
+                                 signal=signals[i])
+        lp_objs.append(lp_obj)
+
+    return landborn_scatter(lp_objs)
+
+
+def landborn_scatter(lp_objs):
+
+    # plot the first plot with lp_objs
+    fig, axs = plt.subplots(2, 1, figsize=(20, 20))
+    for lp_obj in lp_objs:
+        artist = axs[0].plot(lp_obj.x, lp_obj.y, lp_obj.hue, picker=5)[0]
+        # explanation of picker: https://matplotlib.org/3.1.1/gallery/event_handling/pick_event_demo.html
+        artist.obj = lp_obj
+
+    fig.canvas.callbacks.connect('pick_event', lambda event: event.artist.obj.plot(axs[1]))
+
     plt.show()
 
-
-def barhplot_stacked(x, y, hue, data, sort_by_x=True, ys=None, hues=None, show=True,
-                     color_palette=None):
-    """
-
-    > df_test = pd.DataFrame({
-            "x": [20, 35, 30, 35, 27],
-            "y": ['G1', 'G1', 'G2', 'G2', 'G3'],
-            "hue": ["stage1", "stage2", "stage1", "stage2","stage1"]
-        })
-
-    > barhplot_stacked("x", "y", "hue", df_test)
+    return axs
 
 
-    """
+if __name__ == "__main__":
+    # prepare data
+    points = np.random.rand(10, 2)
+    df = pd.DataFrame(points, columns=["x", "y"])
 
-    if sort_by_x:
-        df_sort = data.groupby(y)[x].apply(sum)
-        df_sort = df_sort.reset_index()
-        df_sort = df_sort.sort_values(by=x, ascending=True)
-        ys = df_sort[y]
-    elif ys is None:
-        ys = sorted(set(data[y]))
-
-    if hues is None:
-        hues = sorted(set(data[hue]))
-
-    last_xs = [0 for _ in range(len(ys))]
-    for huei in hues:
-        xs = [sum(data.loc[(data[y] == yi) & (data[hue] == huei), x]) for yi in ys]
-        if sum(xs) > 0:
-            if color_palette is not None:
-                plt.barh(ys, xs, left=last_xs, label=huei, color=next(color_palette))
-            else:
-                plt.barh(ys, xs, left=last_xs, label=huei)
-        last_xs = [last_xs[i] + xs[i] for i in range(len(ys))]
-
-    plt.ylabel(y)
-    plt.legend()
-
-    if show:
-        plt.show()
+    scatter("x", "y", df, points)
