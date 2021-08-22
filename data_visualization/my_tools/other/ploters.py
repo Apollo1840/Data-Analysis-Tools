@@ -2,6 +2,8 @@
 """
 Created on Wed Nov 14 22:08:02 2018
 
+A bunch of pandas dataFrame analysis tools coming out of somewhere.
+
 @author: zouco
 """
 import seaborn as sns
@@ -15,6 +17,11 @@ sns.set_style('white')
 
 
 def plot_correlation_map(df):
+    """
+
+    :param: pd.DataFrame with 2 columns
+    """
+
     corr = df.corr()
     _, ax = plt.subplots(figsize=(12, 10))
     cmap = sns.diverging_palette(220, 10, as_cmap=True)
@@ -78,6 +85,7 @@ def plot_category_by_NA(df, mis_col, cate_col):
 
 
 class StackedPloter:
+    # plot stacked barchart or stacked hist
 
     def __init__(self, df):
         self.df = df
@@ -105,37 +113,6 @@ class StackedPloter:
             plt.ylabel('Number')
             plt.legend()
             plt.show()
-
-
-'''
-    
-def plot_stacked_barchart(df, xcol, ycol, normalized=False):
-    # xcol, ycol are column names
-    # assume the number of rows is the val_col (value_column)
-    
-    'use crosstab maybe?'
-    
-    smalldf = pd.get_dummies(df[ycol],prefix=ycol)
-    smalldf = pd.concat([df[xcol], smalldf], axis=1)
-    if normalized:
-        smalldf.groupby(xcol).agg(np.mean).plot(kind='bar', stacked=True)
-    else:
-        smalldf.groupby(xcol).agg(np.sum).plot(kind='bar', stacked=True)
-
-
-def plot_stacked_hist(df, var, cat):
-    hist_data = []
-    for label in df[cat].unique():
-        hist_data.append(df.loc[df[cat]==label, var])
-    
-    plt.hist(hist_data, stacked=True, bins=50, label=df[cat].unique())
-    plt.xlabel(var)
-    plt.ylabel('Number')
-    plt.legend()
-    plt.show()
-    
-'''
-
 
 # -------------------------------------------------------------------------
 

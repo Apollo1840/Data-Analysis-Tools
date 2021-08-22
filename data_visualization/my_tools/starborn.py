@@ -4,8 +4,8 @@ extension of matplotlib, in seaborn API style.
 
 mustly in interactive field
 
-
-todo: rename to starborn
+functionality:
+    - scatter the interactive points
 
 """
 
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 
 
-class LandPointObj:
+class StarPoint:
 
     def __init__(self, x, y, hue=None, signal=None):
         self.x = x
@@ -28,12 +28,14 @@ class LandPointObj:
         self.info_dict = None
 
     def plot(self, axis):
+        global fig
         axis.cla()
         axis.plot(self.signal)
-        plt.show()
+        fig.canvas.draw_idle()
 
 
-class HeartbeatPointObj(LandPointObj):
+# An example of how to extend StarPoint
+class HeartbeatPointObj(StarPoint):
 
     def plot(self, axis):
         axis.cla()
@@ -53,22 +55,36 @@ class HeartbeatPointObj(LandPointObj):
         plt.show()
 
 
-def landborn_scatter_simple(x, y, data, signals):
-
+def iscatter_simple(x, y, data, signals):
+    """
+    
+    :param x: str
+    :param y: str
+    :param data: pd.DataFrame
+    :param signals: list[list], list of signals row(x, y) present.
+    """
     assert len(data[x]) == len(signals)
 
     x_values = list(data[x])
     y_values = list(data[y])
-    lp_objs = []
+    star_points = []
     for i in range(len(data[x])):
-        lp_objs.append(LandPointObj(x=x_values[i],
-                                       y=y_values[i],
-                                       signal=signals[i]))
+        star_points.append(StarPoint(x=x_values[i],
+                                     y=y_values[i],
+                                     signal=signals[i]))
 
-    return landborn_scatter(lp_objs)
+    return _scatter(star_points)
 
 
-def scatter(x, y, hue=None, data=None, signals=None):
+def iscatter(x, y, hue=None, data=None, signals=None):
+    """
+
+    :param x: str
+    :param y: str
+    :param data: pd.DataFrame
+    :param signals: list[list], list of signals row(x, y) present.
+    """
+
     # todo: look seaborn scatter code to figure out how to implement hue
 
     # inputs handling
@@ -94,27 +110,34 @@ def scatter(x, y, hue=None, data=None, signals=None):
         signals = [(x, y) for x, y in zip(x_values, y_values)]
 
     # initialize moutain point objects
-    lp_objs = []
+    star_points = []
     for i in range(len(x_values)):
-        lp_obj = LandPointObj(x=x_values[i],
-                                 y=y_values[i],
-                                 hue=hues[i],
-                                 signal=signals[i])
-        lp_objs.append(lp_obj)
+        starp = StarPoint(x=x_values[i],
+                          y=y_values[i],
+                          hue=hues[i],
+                          signal=signals[i])
+        star_points.append(starp)
 
-    return landborn_scatter(lp_objs)
+    return _scatter(star_points)
 
 
-def landborn_scatter(lp_objs):
+def _scatter(star_points):
+    """
+    
+    :param: star_objs: List[StarPoint]
+    """
+    global fig
 
-    # plot the first plot with lp_objs
+    # plot the first plot with star_points
     fig, axs = plt.subplots(2, 1, figsize=(20, 20))
-    for lp_obj in lp_objs:
-        artist = axs[0].plot(lp_obj.x, lp_obj.y, lp_obj.hue, picker=5)[0]
-        # explanation of picker: https://matplotlib.org/3.1.1/gallery/event_handling/pick_event_demo.html
-        artist.obj = lp_obj
 
-    fig.canvas.callbacks.connect('pick_event', lambda event: event.artist.obj.plot(axs[1]))
+    for starp in star_points:
+        artist = axs[0].plot(starp.x, starp.y, starp.hue, picker=True)[0]
+        artist.set_pickradius(10)
+        # explanation of picker: https://matplotlib.org/3.1.1/gallery/event_handling/pick_event_demo.html
+        artist.obj = starp
+
+    fig.canvas.mpl_connect('pick_event', lambda event: event.artist.obj.plot(axs[1]))
 
     plt.show()
 
@@ -126,4 +149,4 @@ if __name__ == "__main__":
     points = np.random.rand(10, 2)
     df = pd.DataFrame(points, columns=["x", "y"])
 
-    scatter("x", "y", df, points)
+    iscatter("x", "y", data=df, signals=points)

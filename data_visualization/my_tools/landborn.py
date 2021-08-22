@@ -2,10 +2,15 @@
 
 extension of matplotlib, in seaborn API style.
 
+functionality:
+    - colored barchart, and horizontal barchart
+
 """
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mplcolor
+
+plt.style.use('seaborn')
 
 # very good learn example
 color_map = mplcolor.LinearSegmentedColormap(
@@ -20,38 +25,44 @@ color_map = mplcolor.LinearSegmentedColormap(
     }
 )
 
+color_map_g2r = mplcolor.LinearSegmentedColormap.from_list("my_map", ["g", "r"])
+
+color_map_zcy = mplcolor.LinearSegmentedColormap(
+    "my_map",
+    segmentdata={'red': [(0.0, 0.0, 0.0),
+                         (0.5, 1.0, 1.0),
+                         (1.0, 1.0, 1.0)],
+
+                 'green': [(0.0, 0.0, 0.0),
+                           (0.25, 0.0, 0.0),
+                           (0.75, 1.0, 1.0),
+                           (1.0, 1.0, 1.0)],
+
+                 'blue': [(0.0, 0.0, 0.0),
+                          (0.5, 0.0, 0.0),
+                          (1.0, 1.0, 1.0)]}
+)
+
 
 def barplot_colorbar(x, y, color, data):
     """
-    plot the bar chart, whos bar color is some source of information with
+    plot the bar chart, whos bar color is some source of information
+
+
+    > df = pd.DataFrame({
+            "name": ["tom", "jack", "sam", "marry", "ivy", "cathy", "bob"],
+            "gender": ["m", "m", "m", "f", "f", "f", "m"],
+            "height": [1.6, 1.7, 1.8, 1.65, 1.68, 1.62, 1.62],
+            "weight": [50, 45, 55, 42, 47, 46, 66],
+            "class": ["class1", "class2", "class1", "class2", "class1", "class2", "class1"]
+            })
+    > barplot_colorbar("name", "height", color="weight", data=df)
 
     :params: x: str
     :params: y: str
     :params: color: str
     :params: data: pd.DataFrame
 
-    """
-
-    data_normalizer = mplcolor.Normalize()
-
-    color_map = mplcolor.LinearSegmentedColormap.from_list("my_map", ["g", "r"])
-    """
-    color_map = mplcolor.LinearSegmentedColormap(
-        "my_map",
-        segmentdata={'red': [(0.0, 0.0, 0.0),
-                             (0.5, 1.0, 1.0),
-                             (1.0, 1.0, 1.0)],
-
-                     'green': [(0.0, 0.0, 0.0),
-                               (0.25, 0.0, 0.0),
-                               (0.75, 1.0, 1.0),
-                               (1.0, 1.0, 1.0)],
-
-                     'blue': [(0.0, 0.0, 0.0),
-                              (0.5, 0.0, 0.0),
-                              (1.0, 1.0, 1.0)]}
-    )
-    
     """
 
     x_value = data[x]
@@ -61,7 +72,7 @@ def barplot_colorbar(x, y, color, data):
     plt.bar(list(range(len(x_value))),
             y_value,
             align="center",
-            color=color_map(data_normalizer(c_value)))
+            color=color_map_g2r(mplcolor.Normalize(c_value)))
 
     plt.xticks(list(range(len(x_value))), x_value)
     plt.show()
