@@ -9,6 +9,7 @@ functionality:
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mplcolor
+import seaborn as sns
 
 plt.style.use('seaborn')
 
@@ -119,3 +120,17 @@ def barhplot_stacked(x, y, hue, data, sort_by_x=True, ys=None, hues=None, show=T
 
     if show:
         plt.show()
+
+
+def scatterplot_text(x, y, text, data, *args, **kwargs):
+    sns.scatterplot(x, y, data=data, *args, **kwargs)
+    for line in range(0, len(data)):
+         plt.text(data[x][line]+0.2,
+                  data[y][line],
+                  data[text][line],
+                  horizontalalignment='left',
+                  size='medium',
+                  color='black',
+                  weight='semibold')
+    plt.show()
+
