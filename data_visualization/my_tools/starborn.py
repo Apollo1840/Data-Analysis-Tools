@@ -58,6 +58,7 @@ class HeartbeatStarPoint(StarPoint):
     def plot_with_axis(self, axis):
         beat_ws = 500  # 500 from long_reference_beats
         beat_fs = 360
+
         axis.plot(list((np.arange(len(self.signal)) - beat_ws) * 1000 / beat_fs), self.signal, "-")
         axis.axvline(-90 * 1000 / beat_fs, color="r", ls=":")
         axis.axvline(90 * 1000 / beat_fs, color="r", ls=":")
