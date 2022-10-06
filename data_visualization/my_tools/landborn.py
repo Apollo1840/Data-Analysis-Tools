@@ -4,6 +4,7 @@ extension of matplotlib, in seaborn API style.
 
 functionality:
     - colored barchart, and horizontal barchart
+    - 3d scatter
 
 """
 
@@ -125,12 +126,24 @@ def barhplot_stacked(x, y, hue, data, sort_by_x=True, ys=None, hues=None, show=T
 def scatterplot_text(x, y, text, data, *args, **kwargs):
     sns.scatterplot(x, y, data=data, *args, **kwargs)
     for line in range(0, len(data)):
-         plt.text(data[x][line]+0.2,
-                  data[y][line],
-                  data[text][line],
-                  horizontalalignment='left',
-                  size='medium',
-                  color='black',
-                  weight='semibold')
+        plt.text(data[x][line] + 0.2,
+                 data[y][line],
+                 data[text][line],
+                 horizontalalignment='left',
+                 size='medium',
+                 color='black',
+                 weight='semibold')
     plt.show()
 
+
+def scatterplot_3d(x, y, z, data, hue=None, size=None, marker="o"):
+    color = data[hue] if hue else None
+    size = data[size] if size else None
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+
+    sc = ax.scatter(data[x], data[y], data[z], c=color, size=size, marker=marker)
+    plt.legend(*sc.legend_elements(), bbox_to_anchor=(1.05, 1), loc=2)
+
+    plt.show()

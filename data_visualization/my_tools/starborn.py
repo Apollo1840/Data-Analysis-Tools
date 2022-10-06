@@ -18,6 +18,8 @@ import seaborn as sns
 plt.style.use('seaborn')
 
 
+###################################################################################
+
 class StarPoint:
 
     def __init__(self, x, y, hue=None, signal=None):
@@ -70,6 +72,8 @@ class HeartbeatStarPoint(StarPoint):
                 self.info_dict["local_rr"])
         )
 
+
+###################################################################################
 
 def iscatter_simple(x, y, data, signals):
     """
@@ -141,6 +145,22 @@ def iscatter(x, y, hue=None, data=None, signals=None, custom_star=StarPoint, inf
     return _scatter(star_points)
 
 
+###################################################################################
+
+class DummyObject:
+
+    def __init__(self):
+        self.a = np.random.random()
+        self.b = np.random.random()
+        self.c = np.random.random(5)
+        self.d = np.random.randint(5)
+
+    @staticmethod
+    def plot_dummy(obj, axis):
+        axis.plot(obj.c)
+        axis.set_title(obj.d)
+
+
 def iscatter_items(items, x, y, func_plot, hue=None):
     """
 
@@ -164,6 +184,9 @@ def iscatter_items(items, x, y, func_plot, hue=None):
 
     return _scatter(star_points)
 
+
+###################################################################################
+# Tools
 
 def _scatter(star_points):
     """
@@ -224,20 +247,6 @@ def _palette_from_levels(levels, legend=True):
         plt.show()
 
     return palette
-
-
-class DummyObject:
-
-    def __init__(self):
-        self.a = np.random.random()
-        self.b = np.random.random()
-        self.c = np.random.random(5)
-        self.d = np.random.randint(5)
-
-    @staticmethod
-    def plot_dummy(obj, axis):
-        axis.plot(obj.c)
-        axis.set_title(obj.d)
 
 
 if __name__ == "__main__":
