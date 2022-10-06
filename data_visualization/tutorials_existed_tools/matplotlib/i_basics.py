@@ -23,18 +23,22 @@ print(x)
 # --------------------------------------------------------------------------
 # 1 line and dots
 
-# dim=1
+## 1.1 dim=1
 
 x1 = np.random.randn(20, 1) * 10
 x2 = np.random.randn(20, 1)
 
+print(x1)
+print(x2)
+
 plt.plot(x1, 'o', label='first trial')
 plt.plot(x2, '^', label='second trial')
+
 plt.xticks(range(10), [i for i in 'abcdefghlj'], rotation=90)
 plt.yscale('log')
 plt.show()
 
-# dim=2
+## 1.2 dim=2
 
 print(x)
 plt.plot(x[:, 0], x[:, 1], 'b')
@@ -46,17 +50,22 @@ plt.title('line and dots')
 plt.grid(axis='y')
 plt.show()
 
-# --------------------------------------------------------------------------
-# 2 basic adjustments
-
-# 2.1 more types and add labels
-
-plt.plot(x[:, 0], x[:, 1], 'b--', label='origin')
-plt.plot(x[:, 1], x[:, 0], 'r^', label='xy_reverse')
+for i in range(10):
+    plt.plot(x[i, 0], x[i, 1], "o", c=(i % 2 / 2, i % 3 / 3, i % 5 / 5), label=str(i))
 plt.legend()
 plt.show()
 
-# 2.2 subplots
+# --------------------------------------------------------------------------
+# 2 basic adjustments
+
+## 2.1 more types and add labels
+
+plt.plot(x[:, 0], x[:, 1], 'b--', alpha=0.2, label='origin')
+plt.plot(x[:, 1], x[:, 0], 'r^', ms=20, label='xy_reverse')
+plt.legend()
+plt.show()
+
+## 2.2 subplots
 
 plt.subplot(121)
 plt.plot(x[:, 0], x[:, 1], 'b--')
@@ -112,7 +121,12 @@ plt.show()
 
 # --------------------------------------------------------------------------
 # 3 basic operations
+
+# use style
 plt.style.use('ggplot')
+
 plt.plot([1, 2, 3, 5, 2, 4, 1, 2.7])
-plt.savefig('matplot_example.jpg')
 plt.show()
+
+# save figure
+plt.savefig('matplot_example.png')
