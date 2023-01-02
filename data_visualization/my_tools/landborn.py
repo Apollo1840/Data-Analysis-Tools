@@ -147,3 +147,37 @@ def scatterplot_3d(x, y, z, data, hue=None, size=None, marker="o"):
     plt.legend(*sc.legend_elements(), bbox_to_anchor=(1.05, 1), loc=2)
 
     plt.show()
+
+
+def pie_heatmap(data, row_names, col_names):
+    """
+    row will be the theta,
+    col wiil be the r,
+    """
+
+    def meshgrid_for_polar(n_sections, n_layers):
+        return np.meshgrid(np.linspace(0, 2 * np.pi, n_sections), np.arange(n_layers))
+
+    data = np.array(data).T
+
+    # produce polar plot
+    fig, ax = plt.subplots(subplot_kw=dict(projection='polar'), figsize=(6, 6))
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+
+    # plot data
+    theta, r = meshgrid_for_polar(n_sections=data.shape[1] + 1, n_layers=data.shape[0] + 1)
+    ax.pcolormesh(theta, r, data, cmap="YlGnBu")
+
+    # set ticklabels
+    if row_names is not None:
+        pos, step = np.linspace(0, 2 * np.pi, len(row_names), endpoint=False, retstep=True)
+        pos += step / 2.
+        ax.set_xticks(pos)
+        ax.set_xticklabels(row_names)
+
+    if col_names is not None:
+        ax.set_yticks(np.arange(len(col_names)))
+        ax.set_yticklabels(col_names)
+
+    plt.show()
